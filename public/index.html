@@ -1,33 +1,118 @@
-<h1>Guincho 24h</h1>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guincho 24h</title>
 
-<form id="form">
-  <input name="nome" placeholder="Nome" required />
-  <input name="whatsapp" placeholder="WhatsApp" required />
-  <input name="cidade" placeholder="Cidade" required />
-  <input name="estado" placeholder="Estado" required />
-  <input name="descricao" placeholder="Problema" required />
+  <style>
 
-  <button>Solicitar</button>
-</form>
+    body{
+      font-family: Arial;
+      background:#111;
+      color:white;
+      padding:40px;
+    }
+
+    h1{
+      color:#00ff88;
+    }
+
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-width:400px;
+    }
+
+    input, textarea, button{
+      padding:12px;
+      border:none;
+      border-radius:8px;
+    }
+
+    button{
+      background:#00ff88;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <h1>🚨 Solicitar Guincho</h1>
+
+  <form id="formulario">
+
+    <input type="text" id="nome" placeholder="Seu nome" required>
+
+    <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
+
+    <input type="text" id="cidade" placeholder="Cidade" required>
+
+    <input type="text" id="estado" placeholder="Estado" required>
+
+    <textarea id="descricao" placeholder="Descreva o problema"></textarea>
+
+    <button type="submit">
+      Solicitar Guincho
+    </button>
+
+  </form>
 
 <script>
-document.getElementById("form").addEventListener("submit", async (e) => {
+
+const form = document.getElementById("formulario");
+
+form.addEventListener("submit", async (e) => {
+
   e.preventDefault();
 
-  const data = Object.fromEntries(new FormData(e.target));
+  const dados = {
 
-  const res = await fetch("http://localhost:3000/solicitar", {
+    nome: document.getElementById("nome").value,
+
+    whatsapp: document.getElementById("whatsapp").value,
+
+    cidade: document.getElementById("cidade").value,
+
+    estado: document.getElementById("estado").value,
+
+    descricao: document.getElementById("descricao").value
+
+  };
+
+  const resposta = await fetch("/solicitar", {
+
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body: JSON.stringify(dados)
+
   });
 
-  const json = await res.json();
+  const resultado = await resposta.json();
 
-  alert(json.msg);
+  if(resultado.whatsapp){
 
-  if (json.whatsapp) {
-    window.open(json.whatsapp, "_blank");
+    alert("Pedido enviado!");
+
+    window.open(resultado.whatsapp, "_blank");
+
+  }else{
+
+    alert(resultado.msg || "Erro ao enviar");
+
   }
+
 });
+
 </script>
+
+</body>
+</html>
