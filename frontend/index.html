@@ -1,0 +1,33 @@
+<h1>Guincho 24h</h1>
+
+<form id="form">
+  <input name="nome" placeholder="Nome" required />
+  <input name="whatsapp" placeholder="WhatsApp" required />
+  <input name="cidade" placeholder="Cidade" required />
+  <input name="estado" placeholder="Estado" required />
+  <input name="descricao" placeholder="Problema" required />
+
+  <button>Solicitar</button>
+</form>
+
+<script>
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = Object.fromEntries(new FormData(e.target));
+
+  const res = await fetch("http://localhost:3000/solicitar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const json = await res.json();
+
+  alert(json.msg);
+
+  if (json.whatsapp) {
+    window.open(json.whatsapp, "_blank");
+  }
+});
+</script>
