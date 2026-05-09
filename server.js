@@ -1,21 +1,29 @@
 require("dotenv").config();
+
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
+// CONFIGURAÇÕES
 app.use(cors());
 app.use(express.json());
 
-// CONEXÃO COM BANCO
+// FRONTEND
+app.use(express.static(path.join(__dirname, "public")));
+
+// CONEXÃO MYSQL
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
 });
 
+// TESTAR CONEXÃO
 db.connect((err) => {
   if (err) {
     console.log("❌ Erro banco:", err);
@@ -24,52 +32,105 @@ db.connect((err) => {
   }
 });
 
-// 🔥 CRIAR SOLICITAÇÃO DE GUINCHO
-app.post("/solicitar", (req, res) => {
-  const { nome, whatsapp, cidade, estado, descricao } = req.body;
+// ROTA INICIAL
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
+// SOLICITAR GUINCHO
+app.post("/solicitar", (req, res) => {
+
+  const {
+    nome,
+    whatsapp,
+    cidade,
+    estado,
+    descricao
+  } = req.body;
+
+  // SALVAR SOLICITAÇÃO
   db.query(
-    "INSERT INTO solicitacoes (nome, whatsapp, cidade, estado, descricao) VALUES (?,?,?,?,?)",
+    `INSERT INTO solicitacoes 
+    (nome, whatsapp, cidade, estado, descricao)
+    VALUES (?, ?, ?, ?, ?)`,
     [nome, whatsapp, cidade, estado, descricao],
     (err) => {
-      if (err) return res.json({ erro: err });
 
+      if (err) {
+        console.log(err);
+        return res.json({
+          erro: "Erro ao salvar solicitação"
+        });
+      }
+
+      // BUSCAR GUINCHEIRO
       db.query(
-        "SELECT * FROM guincheiros WHERE cidade = ? AND estado = ? LIMIT 1",
+        `SELECT * FROM guincheiros
+         WHERE cidade = ?
+         AND estado = ?
+         LIMIT 1`,
         [cidade, estado],
         (err2, result) => {
-          if (err2) return res.json({ erro: err2 });
 
+          if (err2) {
+            console.log(err2);
+            return res.json({
+              erro: "Erro ao buscar guincheiro"
+            });
+          }
+
+          // SEM GUINCHEIRO
           if (result.length === 0) {
-            return res.json({ msg: "Nenhum guincho na região" });
+            return res.json({
+              msg: "Nenhum guincheiro encontrado"
+            });
           }
 
           const g = result[0];
 
-          const link = `https://wa.me/${g.whatsapp}?text=🚨 Novo pedido de guincho em ${cidade} - Cliente: ${nome}`;
+          // LINK WHATSAPP
+          const link = `https://wa.me/${g.whatsapp}?text=🚨 Novo pedido de guincho
+
+Cliente: ${nome}
+Cidade: ${cidade}
+Estado: ${estado}
+Descrição: ${descricao}`;
 
           res.json({
-            msg: "Pedido enviado com sucesso!",
+            sucesso: true,
             whatsapp: link
           });
+
         }
       );
+
     }
   );
+
 });
 
-// 📊 LISTAR PEDIDOS (PAINEL)
+// LISTAR PEDIDOS
 app.get("/pedidos", (req, res) => {
+
   db.query(
     "SELECT * FROM solicitacoes ORDER BY id DESC",
     (err, result) => {
-      if (err) return res.json({ erro: err });
+
+      if (err) {
+        console.log(err);
+        return res.json({
+          erro: "Erro ao buscar pedidos"
+        });
+      }
+
       res.json(result);
+
     }
   );
+
 });
 
-// 🚀 RODAR SERVIDOR
-app.listen(process.env.PORT, () => {
-  console.log("🚀 Servidor rodando na porta", process.env.PORT);
+// INICIAR SERVIDOR
+app.listen(process.env.PORT || 3000, () => {
+  console.log("🚀 Servidor online!");
 });
