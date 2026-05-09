@@ -7,14 +7,14 @@ const path = require("path");
 
 const app = express();
 
-// CONFIGURAÇÕES
+// CONFIG
 app.use(cors());
 app.use(express.json());
 
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
 
-// CONEXÃO MYSQL
+// MYSQL
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -25,11 +25,13 @@ const db = mysql.createConnection({
 
 // TESTAR CONEXÃO
 db.connect((err) => {
+
   if (err) {
     console.log("❌ Erro banco:", err);
   } else {
     console.log("✅ Banco conectado!");
   }
+
 });
 
 // ROTA INICIAL
@@ -48,16 +50,20 @@ app.post("/solicitar", (req, res) => {
     descricao
   } = req.body;
 
-  // SALVAR SOLICITAÇÃO
+  // SALVAR NO BANCO
   db.query(
-    `INSERT INTO solicitacoes 
-    (nome, whatsapp, cidade, estado, descricao)
-    VALUES (?, ?, ?, ?, ?)`,
+
+    `INSERT INTO solicitacoes
+    (id, nome, whatsapp, cidade, estado, descricao)
+    VALUES (NULL, ?, ?, ?, ?, ?)`,
+
     [nome, whatsapp, cidade, estado, descricao],
+
     (err) => {
 
       if (err) {
         console.log(err);
+
         return res.json({
           erro: "Erro ao salvar solicitação"
         });
@@ -65,25 +71,33 @@ app.post("/solicitar", (req, res) => {
 
       // BUSCAR GUINCHEIRO
       db.query(
+
         `SELECT * FROM guincheiros
-         WHERE cidade = ?
-         AND estado = ?
-         LIMIT 1`,
+        WHERE cidade = ?
+        AND estado = ?
+        LIMIT 1`,
+
         [cidade, estado],
+
         (err2, result) => {
 
           if (err2) {
+
             console.log(err2);
+
             return res.json({
               erro: "Erro ao buscar guincheiro"
             });
+
           }
 
           // SEM GUINCHEIRO
           if (result.length === 0) {
+
             return res.json({
               msg: "Nenhum guincheiro encontrado"
             });
+
           }
 
           const g = result[0];
@@ -102,9 +116,11 @@ Descrição: ${descricao}`;
           });
 
         }
+
       );
 
     }
+
   );
 
 });
@@ -114,18 +130,23 @@ app.get("/pedidos", (req, res) => {
 
   db.query(
     "SELECT * FROM solicitacoes ORDER BY id DESC",
+
     (err, result) => {
 
       if (err) {
+
         console.log(err);
+
         return res.json({
           erro: "Erro ao buscar pedidos"
         });
+
       }
 
       res.json(result);
 
     }
+
   );
 
 });
