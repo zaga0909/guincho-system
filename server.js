@@ -34,7 +34,7 @@ db.connect((err) => {
 
     console.log("✅ Banco conectado!");
 
-    // CRIAR TABELA SOLICITACOES
+    // TABELA SOLICITAÇÕES
     db.query(`
       CREATE TABLE IF NOT EXISTS solicitacoes_nova (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -44,17 +44,9 @@ db.connect((err) => {
         estado VARCHAR(10),
         descricao TEXT
       )
-    `, (err) => {
+    `);
 
-      if (err) {
-        console.log("❌ Erro criando tabela solicitacoes:", err);
-      } else {
-        console.log("✅ Tabela solicitacoes_nova pronta!");
-      }
-
-    });
-
-    // CRIAR TABELA GUINCHEIROS
+    // TABELA GUINCHEIROS
     db.query(`
       CREATE TABLE IF NOT EXISTS guincheiros (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -63,15 +55,7 @@ db.connect((err) => {
         cidade VARCHAR(100),
         estado VARCHAR(10)
       )
-    `, (err) => {
-
-      if (err) {
-        console.log("❌ Erro criando tabela guincheiros:", err);
-      } else {
-        console.log("✅ Tabela guincheiros pronta!");
-      }
-
-    });
+    `);
 
   }
 
@@ -95,6 +79,7 @@ app.post("/solicitar", (req, res) => {
     descricao
   } = req.body;
 
+  // SALVAR PEDIDO
   db.query(
 
     `INSERT INTO solicitacoes_nova
@@ -137,8 +122,10 @@ app.post("/solicitar", (req, res) => {
 
           }
 
-          // SEM GUINCHEIRO
+          // NÃO ENCONTROU
           if (result.length === 0) {
+
+            console.log("❌ Nenhum guincheiro encontrado");
 
             return res.json({
               msg: "Nenhum guincheiro encontrado"
@@ -148,6 +135,9 @@ app.post("/solicitar", (req, res) => {
 
           const g = result[0];
 
+          console.log("✅ Guincheiro encontrado:");
+          console.log(g);
+
           // LINK WHATSAPP
           const link = `https://wa.me/${g.whatsapp}?text=🚨 Novo pedido de guincho
 
@@ -155,6 +145,9 @@ Cliente: ${nome}
 Cidade: ${cidade}
 Estado: ${estado}
 Descrição: ${descricao}`;
+
+          console.log("✅ LINK:");
+          console.log(link);
 
           res.json({
             sucesso: true,
