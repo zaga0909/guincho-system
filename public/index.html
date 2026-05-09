@@ -8,9 +8,9 @@
   <style>
 
     body{
-      font-family: Arial;
       background:#111;
       color:white;
+      font-family:Arial;
       padding:40px;
     }
 
@@ -27,8 +27,8 @@
 
     input, textarea, button{
       padding:12px;
-      border:none;
       border-radius:8px;
+      border:none;
     }
 
     button{
@@ -42,25 +42,25 @@
 </head>
 <body>
 
-  <h1>🚨 Solicitar Guincho</h1>
+<h1>🚨 Solicitar Guincho</h1>
 
-  <form id="formulario">
+<form id="formulario">
 
-    <input type="text" id="nome" placeholder="Seu nome" required>
+  <input type="text" id="nome" placeholder="Seu nome" required>
 
-    <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
+  <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
 
-    <input type="text" id="cidade" placeholder="Cidade" required>
+  <input type="text" id="cidade" placeholder="Cidade" required>
 
-    <input type="text" id="estado" placeholder="Estado" required>
+  <input type="text" id="estado" placeholder="Estado" required>
 
-    <textarea id="descricao" placeholder="Descreva o problema"></textarea>
+  <textarea id="descricao" placeholder="Problema do veículo"></textarea>
 
-    <button type="submit">
-      Solicitar Guincho
-    </button>
+  <button type="submit">
+    Solicitar Guincho
+  </button>
 
-  </form>
+</form>
 
 <script>
 
@@ -73,40 +73,49 @@ form.addEventListener("submit", async (e) => {
   const dados = {
 
     nome: document.getElementById("nome").value,
-
     whatsapp: document.getElementById("whatsapp").value,
-
     cidade: document.getElementById("cidade").value,
-
     estado: document.getElementById("estado").value,
-
     descricao: document.getElementById("descricao").value
 
   };
 
-  const resposta = await fetch("/solicitar", {
+  try {
 
-    method: "POST",
+    const resposta = await fetch("/solicitar", {
 
-    headers:{
-      "Content-Type":"application/json"
-    },
+      method: "POST",
 
-    body: JSON.stringify(dados)
+      headers:{
+        "Content-Type":"application/json"
+      },
 
-  });
+      body: JSON.stringify(dados)
 
-  const resultado = await resposta.json();
+    });
 
-  if(resultado.whatsapp){
+    const resultado = await resposta.json();
 
-    alert("Pedido enviado!");
+    console.log(resultado);
 
-    window.open(resultado.whatsapp, "_blank");
+    // ABRIR WHATSAPP
+    if(resultado.whatsapp){
 
-  }else{
+      alert("Pedido enviado!");
 
-    alert(resultado.msg || "Erro ao enviar");
+      window.location.href = resultado.whatsapp;
+
+    }else{
+
+      alert(resultado.msg || resultado.erro || "Erro ao enviar");
+
+    }
+
+  } catch (erro) {
+
+    console.log(erro);
+
+    alert("Erro no sistema");
 
   }
 
