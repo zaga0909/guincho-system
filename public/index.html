@@ -6,11 +6,7 @@
   <title>Vadeco'S Guinchos</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: Arial, sans-serif;
@@ -20,22 +16,17 @@
 
     header {
       padding: 22px 8%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       background: #061426;
       border-bottom: 2px solid #ff8c00;
     }
 
     .logo {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
       color: #ff8c00;
     }
 
-    .logo span {
-      color: #2f9bff;
-    }
+    .logo span { color: #2f9bff; }
 
     .hero {
       padding: 70px 8%;
@@ -45,27 +36,24 @@
       align-items: center;
     }
 
-    .hero h1 {
+    h1 {
       font-size: 44px;
       margin-bottom: 18px;
     }
 
-    .hero h1 span {
-      color: #ff8c00;
-    }
+    h1 span { color: #ff8c00; }
 
-    .hero p {
+    p {
       font-size: 18px;
       line-height: 1.6;
       color: #dce8ff;
-      margin-bottom: 24px;
     }
 
     .cards {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 20px;
+      margin-top: 24px;
     }
 
     .card {
@@ -73,7 +61,6 @@
       border: 1px solid #174b88;
       padding: 14px;
       border-radius: 12px;
-      min-width: 140px;
     }
 
     .form-box {
@@ -85,8 +72,8 @@
     }
 
     .form-box h2 {
-      margin-bottom: 16px;
       color: #071a33;
+      margin-bottom: 15px;
     }
 
     form {
@@ -95,10 +82,10 @@
       gap: 12px;
     }
 
-    input, textarea {
+    input, textarea, button {
       padding: 13px;
-      border: 1px solid #ccc;
       border-radius: 10px;
+      border: 1px solid #ccc;
       font-size: 15px;
     }
 
@@ -108,18 +95,21 @@
     }
 
     button {
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
       background: #ff8c00;
       color: white;
       font-weight: bold;
-      font-size: 16px;
+      border: none;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #e67d00;
+    .gps {
+      background: #2f9bff;
+    }
+
+    .status {
+      font-size: 14px;
+      color: #071a33;
+      margin-top: 5px;
     }
 
     section {
@@ -130,12 +120,6 @@
     section h2 {
       color: #ff8c00;
       margin-bottom: 15px;
-    }
-
-    section p {
-      color: #dce8ff;
-      line-height: 1.6;
-      max-width: 900px;
     }
 
     footer {
@@ -151,12 +135,8 @@
         padding: 45px 6%;
       }
 
-      .hero h1 {
+      h1 {
         font-size: 34px;
-      }
-
-      header {
-        padding: 18px 6%;
       }
     }
   </style>
@@ -169,11 +149,13 @@
 </header>
 
 <main class="hero">
+
   <div>
     <h1>Guincho rápido e seguro para sua <span>região</span></h1>
+
     <p>
       Atendimento para veículos de leilão, remoções, panes, transporte e suporte em estrada.
-      Solicite pelo site e seja direcionado para o responsável mais próximo.
+      Solicite pelo site e seja direcionado para o responsável da sua região.
     </p>
 
     <div class="cards">
@@ -189,29 +171,39 @@
     <form id="formulario">
       <input type="text" id="nome" placeholder="Seu nome" required>
       <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
+
+      <button type="button" class="gps" onclick="pegarLocalizacao()">
+        📍 Usar minha localização
+      </button>
+
+      <div class="status" id="statusGps">
+        Você também pode preencher cidade e estado manualmente.
+      </div>
+
       <input type="text" id="cidade" placeholder="Cidade" required>
       <input type="text" id="estado" placeholder="Estado. Ex: SC" required>
+
       <textarea id="descricao" placeholder="Descreva o problema do veículo"></textarea>
 
       <button type="submit">Solicitar atendimento</button>
     </form>
   </div>
+
 </main>
 
 <section>
   <h2>Sobre a Vadeco'S Guinchos</h2>
   <p>
     A Vadeco'S Guinchos atua com suporte, remoção e transporte de veículos,
-    oferecendo um atendimento ágil, organizado e direcionado para cada região.
-    Nosso objetivo é facilitar o contato entre cliente e guincheiro de forma simples e rápida.
+    oferecendo atendimento ágil, organizado e direcionado para cada região.
   </p>
 </section>
 
 <section>
   <h2>Como funciona</h2>
   <p>
-    Você preenche seus dados, informa cidade, estado e o problema do veículo.
-    O sistema registra o pedido e direciona o atendimento para o WhatsApp do responsável.
+    Você informa seus dados, cidade, estado e o problema do veículo.
+    O sistema registra o pedido e direciona para o WhatsApp do responsável.
   </p>
 </section>
 
@@ -220,6 +212,59 @@
 </footer>
 
 <script>
+async function pegarLocalizacao() {
+  const status = document.getElementById("statusGps");
+
+  if (!navigator.geolocation) {
+    status.innerText = "Seu navegador não suporta localização.";
+    return;
+  }
+
+  status.innerText = "Buscando sua localização...";
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    try {
+      const resposta = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+      );
+
+      const dados = await resposta.json();
+
+      const cidade =
+        dados.address.city ||
+        dados.address.town ||
+        dados.address.village ||
+        dados.address.municipality ||
+        "";
+
+      const estado = dados.address.state || "";
+
+      document.getElementById("cidade").value = cidade;
+
+      if (estado.includes("Santa Catarina")) {
+        document.getElementById("estado").value = "SC";
+      } else if (estado.includes("Paraná")) {
+        document.getElementById("estado").value = "PR";
+      } else if (estado.includes("Rio Grande do Sul")) {
+        document.getElementById("estado").value = "RS";
+      } else {
+        document.getElementById("estado").value = estado;
+      }
+
+      status.innerText = "Localização preenchida com sucesso.";
+
+    } catch (erro) {
+      status.innerText = "Não consegui detectar a cidade. Preencha manualmente.";
+    }
+
+  }, () => {
+    status.innerText = "Permissão negada. Preencha manualmente.";
+  });
+}
+
 const form = document.getElementById("formulario");
 
 form.addEventListener("submit", async (e) => {
@@ -233,26 +278,21 @@ form.addEventListener("submit", async (e) => {
     descricao: document.getElementById("descricao").value
   };
 
-  try {
-    const resposta = await fetch("/solicitar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(dados)
-    });
+  const resposta = await fetch("/solicitar", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dados)
+  });
 
-    const resultado = await resposta.json();
+  const resultado = await resposta.json();
 
-    if (resultado.whatsapp) {
-      alert("Pedido enviado!");
-      window.location.href = resultado.whatsapp;
-    } else {
-      alert(resultado.msg || resultado.erro || "Erro ao enviar");
-    }
-
-  } catch (erro) {
-    alert("Erro no sistema");
+  if (resultado.whatsapp) {
+    alert("Pedido enviado!");
+    window.location.href = resultado.whatsapp;
+  } else {
+    alert(resultado.msg || resultado.erro || "Erro ao enviar");
   }
 });
 </script>
