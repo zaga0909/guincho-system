@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mapa - Vadeco'S Guinchos</title>
+
+  <link rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Arial;
+      background:#071a33;
+      color:white;
+    }
+
+    .topo{
+      padding:20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:#061426;
+      border-bottom:2px solid #ff8c00;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    h1{
+      color:#ff8c00;
+    }
+
+    .botoes{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+      background:#ff8c00;
+      color:white;
+    }
+
+    #map{
+      width:100%;
+      height:calc(100vh - 80px);
+    }
+
+    .popup{
+      font-family:Arial;
+    }
+
+    .popup h3{
+      margin-bottom:10px;
+      color:#071a33;
+    }
+
+    .popup p{
+      margin:5px 0;
+    }
+
+    .popup a{
+      display:inline-block;
+      margin-top:10px;
+      background:#25d366;
+      color:white;
+      padding:8px 12px;
+      border-radius:8px;
+      text-decoration:none;
+      font-weight:bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<script>
+
+if(localStorage.getItem("adminLogado") !== "sim"){
+
+  window.location.href = "/login.html";
+
+}
+
+</script>
+
+<div class="topo">
+
+  <h1>📍 Mapa de Chamados</h1>
+
+  <div class="botoes">
+
+    <a href="/sistema.html">
+      <button>Painel</button>
+    </a>
+
+    <button onclick="location.reload()">
+      Atualizar
+    </button>
+
+  </div>
+
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map('map').setView([-28.6775, -49.3697], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+  attribution: '&copy; OpenStreetMap'
+
+}).addTo(map);
+
+async function carregarPedidos(){
+
+  const resposta = await fetch("/pedidos");
+
+  const pedidos = await resposta.json();
+
+  pedidos.forEach(p => {
+
+    if(!p.latitude || !p.longitude) return;
+
+    let cor = "orange";
+
+    if(p.status === "Em atendimento"){
+      cor = "blue";
+    }
+
+    if(p.status === "Finalizado"){
+      cor = "green";
+    }
+
+    const marker = L.circleMarker(
+
+      [p.latitude, p.longitude],
+
+      {
+        radius:10,
+        fillColor:cor,
+        color:"#fff",
+        weight:2,
+        opacity:1,
+        fillOpacity:0.9
+      }
+
+    ).addTo(map);
+
+    marker.bindPopup(`
+
+      <div class="popup">
+
+        <h3>${p.nome}</h3>
+
+        <p><strong>Status:</strong> ${p.status || "Pendente"}</p>
+
+        <p><strong>Cidade:</strong> ${p.cidade}/${p.estado}</p>
+
+        <p><strong>Bairro:</strong> ${p.bairro || "Não informado"}</p>
+
+        <p><strong>Endereço:</strong> ${p.endereco || "Não informado"}</p>
+
+        <p><strong>Descrição:</strong> ${p.descricao}</p>
+
+        <a href="https://wa.me/55${p.whatsapp}" target="_blank">
+
+          WhatsApp
+
+        </a>
+
+        <br><br>
+
+        <a
+        href="https://www.google.com/maps?q=${p.latitude},${p.longitude}"
+        target="_blank">
+
+          Abrir GPS
+
+        </a>
+
+      </div>
+
+    `);
+
+  });
+
+}
+
+carregarPedidos();
+
+</script>
+
+</body>
+</html>
