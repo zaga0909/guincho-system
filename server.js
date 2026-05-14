@@ -7,14 +7,11 @@ const path = require("path");
 
 const app = express();
 
-// CONFIG
 app.use(cors());
 app.use(express.json());
 
-// FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
 
-// MYSQL
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -23,7 +20,6 @@ const db = mysql.createConnection({
   port: process.env.DB_PORT
 });
 
-// CONECTAR MYSQL
 db.connect((err) => {
 
   if (err) {
@@ -34,7 +30,6 @@ db.connect((err) => {
 
     console.log("✅ Banco conectado!");
 
-    // TABELA SOLICITAÇÕES
     db.query(`
       CREATE TABLE IF NOT EXISTS solicitacoes_nova (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -42,11 +37,11 @@ db.connect((err) => {
         whatsapp VARCHAR(20),
         cidade VARCHAR(100),
         estado VARCHAR(10),
-        descricao TEXT
+        descricao TEXT,
+        status VARCHAR(30) DEFAULT 'Pendente'
       )
     `);
 
-    // TABELA GUINCHEIROS
     db.query(`
       CREATE TABLE IF NOT EXISTS guincheiros (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -61,14 +56,14 @@ db.connect((err) => {
 
 });
 
-// ROTA INICIAL
+// HOME
 app.get("/", (req, res) => {
 
   res.sendFile(path.join(__dirname, "public", "index.html"));
 
 });
 
-// SOLICITAR GUINCHO
+// NOVO PEDIDO
 app.post("/solicitar", (req, res) => {
 
   const {
@@ -79,7 +74,6 @@ app.post("/solicitar", (req, res) => {
     descricao
   } = req.body;
 
-  // SALVAR PEDIDO
   db.query(
 
     `INSERT INTO solicitacoes_nova
@@ -100,7 +94,6 @@ app.post("/solicitar", (req, res) => {
 
       }
 
-      // BUSCAR GUINCHEIRO
       db.query(
 
         `SELECT * FROM guincheiros
@@ -122,10 +115,7 @@ app.post("/solicitar", (req, res) => {
 
           }
 
-          // NÃO ENCONTROU
           if (result.length === 0) {
-
-            console.log("❌ Nenhum guincheiro encontrado");
 
             return res.json({
               msg: "Nenhum guincheiro encontrado"
@@ -135,19 +125,12 @@ app.post("/solicitar", (req, res) => {
 
           const g = result[0];
 
-          console.log("✅ Guincheiro encontrado:");
-          console.log(g);
-
-          // LINK WHATSAPP
           const link = `https://wa.me/${g.whatsapp}?text=🚨 Novo pedido de guincho
 
 Cliente: ${nome}
 Cidade: ${cidade}
 Estado: ${estado}
 Descrição: ${descricao}`;
-
-          console.log("✅ LINK:");
-          console.log(link);
 
           res.json({
             sucesso: true,
@@ -191,7 +174,39 @@ app.get("/pedidos", (req, res) => {
 
 });
 
-// SERVIDOR
+// ALTERAR STATUS
+app.put("/status/:id", (req, res) => {
+
+  const { status } = req.body;
+
+  db.query(
+
+    "UPDATE solicitacoes_nova SET status=? WHERE id=?",
+
+    [status, req.params.id],
+
+    (err) => {
+
+      if (err) {
+
+        console.log(err);
+
+        return res.json({
+          erro: "Erro ao atualizar status"
+        });
+
+      }
+
+      res.json({
+        sucesso: true
+      });
+
+    }
+
+  );
+
+});
+
 app.listen(process.env.PORT || 3000, () => {
 
   console.log("🚀 Servidor online!");
