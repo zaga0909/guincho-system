@@ -125,11 +125,18 @@
     .aviso {
       background:#ff8c00;
       color:white;
-      padding:14px;
+      padding:16px;
       border-radius:12px;
       margin-bottom:20px;
       font-weight:bold;
       display:none;
+      animation:pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform:scale(1); }
+      50% { transform:scale(1.02); }
+      100% { transform:scale(1); }
     }
   </style>
 </head>
@@ -146,6 +153,8 @@ if(localStorage.getItem("adminLogado") !== "sim"){
   <h1>🚛 Central Operacional Vadeco'S Guinchos</h1>
 
   <div class="topo-botoes">
+    <button class="btn-azul" onclick="ativarNotificacoes()">Ativar Notificações</button>
+
     <a href="/guincheiros.html">
       <button class="btn-laranja">Guincheiros</button>
     </a>
@@ -186,26 +195,61 @@ if(localStorage.getItem("adminLogado") !== "sim"){
 
 <script>
 let quantidadeAnterior = 0;
+let primeiraCarga = true;
 
 function sair(){
   localStorage.removeItem("adminLogado");
   window.location.href = "/login.html";
 }
 
+function ativarNotificacoes(){
+  if("Notification" in window){
+    Notification.requestPermission().then(() => {
+      alert("Notificações ativadas!");
+    });
+  }else{
+    alert("Seu navegador não suporta notificações.");
+  }
+}
+
+function tocarSom(){
+  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  audio.play().catch(() => {});
+}
+
+function mostrarNotificacao(titulo, mensagem){
+  if("Notification" in window && Notification.permission === "granted"){
+    new Notification(titulo, {
+      body: mensagem,
+      icon: "/icons/icon-512.png"
+    });
+  }
+}
+
 async function carregarPedidos(){
   const resposta = await fetch("/pedidos");
   const pedidos = await resposta.json();
 
-  if(quantidadeAnterior !== 0 && pedidos.length > quantidadeAnterior){
+  if(!primeiraCarga && pedidos.length > quantidadeAnterior){
+    const novoPedido = pedidos[0];
+
     const aviso = document.getElementById("avisoNovo");
     aviso.style.display = "block";
 
+    tocarSom();
+
+    mostrarNotificacao(
+      "Novo pedido de guincho",
+      `${novoPedido.nome} - ${novoPedido.cidade}/${novoPedido.estado}`
+    );
+
     setTimeout(() => {
       aviso.style.display = "none";
-    }, 5000);
+    }, 6000);
   }
 
   quantidadeAnterior = pedidos.length;
+  primeiraCarga = false;
 
   document.getElementById("totalPedidos").innerText = pedidos.length;
 
@@ -288,7 +332,7 @@ async function alterarStatus(id, status){
 
 carregarPedidos();
 
-setInterval(carregarPedidos, 10000);
+setInterval(carregarPedidos, 5000);
 </script>
 
 </body>
