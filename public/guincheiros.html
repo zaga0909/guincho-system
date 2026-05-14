@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Guincheiros - Vadeco'S Guinchos</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #071a33;
+      color: white;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #ff8c00;
+      margin-bottom: 20px;
+    }
+
+    form, .card {
+      background: white;
+      color: #111;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      padding: 12px;
+      margin: 6px 0;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #ff8c00;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .excluir {
+      background: red;
+    }
+
+    a {
+      color: #ff8c00;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<script>
+if(localStorage.getItem("adminLogado") !== "sim"){
+  window.location.href = "/login.html";
+}
+</script>
+
+<h1>🚛 Cadastro de Guincheiros</h1>
+
+<p><a href="/sistema.html">Voltar para pedidos</a></p>
+
+<form id="formGuincheiro">
+  <input id="nome" placeholder="Nome do guincheiro" required>
+  <input id="whatsapp" placeholder="WhatsApp com DDI. Ex: 5548999999999" required>
+  <input id="cidade" placeholder="Cidade" required>
+  <input id="estado" placeholder="Estado. Ex: SC" required>
+  <button>Cadastrar Guincheiro</button>
+</form>
+
+<div id="lista">Carregando...</div>
+
+<script>
+const form = document.getElementById("formGuincheiro");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const dados = {
+    nome: document.getElementById("nome").value,
+    whatsapp: document.getElementById("whatsapp").value,
+    cidade: document.getElementById("cidade").value,
+    estado: document.getElementById("estado").value
+  };
+
+  await fetch("/guincheiros", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  });
+
+  form.reset();
+  carregarGuincheiros();
+});
+
+async function carregarGuincheiros(){
+  const res = await fetch("/guincheiros");
+  const guincheiros = await res.json();
+
+  const lista = document.getElementById("lista");
+
+  if(!guincheiros.length){
+    lista.innerHTML = "Nenhum guincheiro cadastrado.";
+    return;
+  }
+
+  lista.innerHTML = "";
+
+  guincheiros.forEach(g => {
+    lista.innerHTML += `
+      <div class="card">
+        <h2>${g.nome}</h2>
+        <p><strong>WhatsApp:</strong> ${g.whatsapp}</p>
+        <p><strong>Cidade:</strong> ${g.cidade}</p>
+        <p><strong>Estado:</strong> ${g.estado}</p>
+        <button class="excluir" onclick="excluirGuincheiro(${g.id})">Excluir</button>
+      </div>
+    `;
+  });
+}
+
+async function excluirGuincheiro(id){
+  await fetch(`/guincheiros/${id}`, {
+    method: "DELETE"
+  });
+
+  carregarGuincheiros();
+}
+
+carregarGuincheiros();
+</script>
+
+</body>
+</html>
