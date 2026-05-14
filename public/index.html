@@ -1,126 +1,260 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guincho 24h</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vadeco'S Guinchos</title>
 
   <style>
-
-    body{
-      background:#111;
-      color:white;
-      font-family:Arial;
-      padding:40px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    h1{
-      color:#00ff88;
+    body {
+      font-family: Arial, sans-serif;
+      background: #071a33;
+      color: white;
     }
 
-    form{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-width:400px;
+    header {
+      padding: 22px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #061426;
+      border-bottom: 2px solid #ff8c00;
     }
 
-    input, textarea, button{
-      padding:12px;
-      border-radius:8px;
-      border:none;
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff8c00;
     }
 
-    button{
-      background:#00ff88;
-      font-weight:bold;
-      cursor:pointer;
+    .logo span {
+      color: #2f9bff;
     }
 
+    .hero {
+      padding: 70px 8%;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: 44px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 span {
+      color: #ff8c00;
+    }
+
+    .hero p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #dce8ff;
+      margin-bottom: 24px;
+    }
+
+    .cards {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #0d2a50;
+      border: 1px solid #174b88;
+      padding: 14px;
+      border-radius: 12px;
+      min-width: 140px;
+    }
+
+    .form-box {
+      background: white;
+      color: #111;
+      padding: 28px;
+      border-radius: 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,.35);
+    }
+
+    .form-box h2 {
+      margin-bottom: 16px;
+      color: #071a33;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input, textarea {
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+
+    textarea {
+      resize: none;
+      min-height: 90px;
+    }
+
+    button {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #ff8c00;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e67d00;
+    }
+
+    section {
+      padding: 50px 8%;
+      background: #081f3d;
+    }
+
+    section h2 {
+      color: #ff8c00;
+      margin-bottom: 15px;
+    }
+
+    section p {
+      color: #dce8ff;
+      line-height: 1.6;
+      max-width: 900px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #061426;
+      color: #aaa;
+    }
+
+    @media (max-width: 850px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 45px 6%;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      header {
+        padding: 18px 6%;
+      }
+    }
   </style>
-
 </head>
+
 <body>
 
-<h1>🚨 Solicitar Guincho</h1>
+<header>
+  <div class="logo">Vadeco'S <span>Guinchos</span></div>
+</header>
 
-<form id="formulario">
+<main class="hero">
+  <div>
+    <h1>Guincho rápido e seguro para sua <span>região</span></h1>
+    <p>
+      Atendimento para veículos de leilão, remoções, panes, transporte e suporte em estrada.
+      Solicite pelo site e seja direcionado para o responsável mais próximo.
+    </p>
 
-  <input type="text" id="nome" placeholder="Seu nome" required>
+    <div class="cards">
+      <div class="card">🚛 Guincho 24h</div>
+      <div class="card">📍 Atendimento por região</div>
+      <div class="card">📲 Chamada via WhatsApp</div>
+    </div>
+  </div>
 
-  <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
+  <div class="form-box">
+    <h2>Solicitar Guincho</h2>
 
-  <input type="text" id="cidade" placeholder="Cidade" required>
+    <form id="formulario">
+      <input type="text" id="nome" placeholder="Seu nome" required>
+      <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
+      <input type="text" id="cidade" placeholder="Cidade" required>
+      <input type="text" id="estado" placeholder="Estado. Ex: SC" required>
+      <textarea id="descricao" placeholder="Descreva o problema do veículo"></textarea>
 
-  <input type="text" id="estado" placeholder="Estado" required>
+      <button type="submit">Solicitar atendimento</button>
+    </form>
+  </div>
+</main>
 
-  <textarea id="descricao" placeholder="Problema do veículo"></textarea>
+<section>
+  <h2>Sobre a Vadeco'S Guinchos</h2>
+  <p>
+    A Vadeco'S Guinchos atua com suporte, remoção e transporte de veículos,
+    oferecendo um atendimento ágil, organizado e direcionado para cada região.
+    Nosso objetivo é facilitar o contato entre cliente e guincheiro de forma simples e rápida.
+  </p>
+</section>
 
-  <button type="submit">
-    Solicitar Guincho
-  </button>
+<section>
+  <h2>Como funciona</h2>
+  <p>
+    Você preenche seus dados, informa cidade, estado e o problema do veículo.
+    O sistema registra o pedido e direciona o atendimento para o WhatsApp do responsável.
+  </p>
+</section>
 
-</form>
+<footer>
+  © 2026 Vadeco'S Guinchos — Atendimento em todo Brasil
+</footer>
 
 <script>
-
 const form = document.getElementById("formulario");
 
 form.addEventListener("submit", async (e) => {
-
   e.preventDefault();
 
   const dados = {
-
     nome: document.getElementById("nome").value,
     whatsapp: document.getElementById("whatsapp").value,
     cidade: document.getElementById("cidade").value,
     estado: document.getElementById("estado").value,
     descricao: document.getElementById("descricao").value
-
   };
 
   try {
-
     const resposta = await fetch("/solicitar", {
-
       method: "POST",
-
-      headers:{
-        "Content-Type":"application/json"
+      headers: {
+        "Content-Type": "application/json"
       },
-
       body: JSON.stringify(dados)
-
     });
 
     const resultado = await resposta.json();
 
-    console.log(resultado);
-
-    // ABRIR WHATSAPP
-    if(resultado.whatsapp){
-
+    if (resultado.whatsapp) {
       alert("Pedido enviado!");
-
       window.location.href = resultado.whatsapp;
-
-    }else{
-
+    } else {
       alert(resultado.msg || resultado.erro || "Erro ao enviar");
-
     }
 
   } catch (erro) {
-
-    console.log(erro);
-
     alert("Erro no sistema");
-
   }
-
 });
-
 </script>
 
 </body>
