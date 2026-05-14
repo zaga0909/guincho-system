@@ -2,73 +2,222 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel - Vadeco'S Guinchos</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #071a33;
-      color: white;
-      padding: 30px;
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
     }
 
-    h1 {
-      color: #ff8c00;
-      margin-bottom: 20px;
+    body{
+      font-family:Arial;
+      background:#071a33;
+      color:white;
+      padding:30px;
     }
 
-    .pedido {
-      background: white;
-      color: #111;
-      padding: 18px;
-      border-radius: 12px;
-      margin-bottom: 15px;
+    h1{
+      color:#ff8c00;
+      margin-bottom:30px;
     }
 
-    .pedido strong {
-      color: #071a33;
+    #lista{
+      display:grid;
+      gap:20px;
     }
 
-    a {
-      color: #ff8c00;
-      font-weight: bold;
+    .pedido{
+      background:white;
+      color:#111;
+      padding:20px;
+      border-radius:16px;
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
     }
+
+    .pedido h2{
+      color:#071a33;
+      margin-bottom:10px;
+    }
+
+    .pedido p{
+      margin:6px 0;
+    }
+
+    .status{
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:999px;
+      font-weight:bold;
+      margin-top:10px;
+      margin-bottom:15px;
+    }
+
+    .pendente{
+      background:#ffe08a;
+      color:#111;
+    }
+
+    .andamento{
+      background:#5db2ff;
+      color:white;
+    }
+
+    .finalizado{
+      background:#39d98a;
+      color:white;
+    }
+
+    .acoes{
+      display:flex;
+      gap:10px;
+      margin-top:15px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .btn1{
+      background:#2f9bff;
+      color:white;
+    }
+
+    .btn2{
+      background:#39d98a;
+      color:white;
+    }
+
+    .btn3{
+      background:#ff8c00;
+      color:white;
+    }
+
+    a{
+      text-decoration:none;
+    }
+
   </style>
+
 </head>
 <body>
 
-<h1>Painel de Pedidos - Vadeco'S Guinchos</h1>
+<h1>🚛 Painel Vadeco'S Guinchos</h1>
 
-<div id="lista">Carregando pedidos...</div>
+<div id="lista">
+  Carregando pedidos...
+</div>
 
 <script>
-async function carregarPedidos() {
+
+async function carregarPedidos(){
+
   const resposta = await fetch("/pedidos");
+
   const pedidos = await resposta.json();
 
   const lista = document.getElementById("lista");
 
-  if (!pedidos.length) {
+  if(!pedidos.length){
+
     lista.innerHTML = "Nenhum pedido encontrado.";
+
     return;
+
   }
 
   lista.innerHTML = "";
 
   pedidos.forEach(p => {
+
+    let classeStatus = "pendente";
+
+    if(p.status === "Em atendimento"){
+      classeStatus = "andamento";
+    }
+
+    if(p.status === "Finalizado"){
+      classeStatus = "finalizado";
+    }
+
     lista.innerHTML += `
+
       <div class="pedido">
-        <p><strong>Nome:</strong> ${p.nome}</p>
+
+        <h2>${p.nome}</h2>
+
         <p><strong>WhatsApp:</strong> ${p.whatsapp}</p>
+
         <p><strong>Cidade:</strong> ${p.cidade}</p>
+
         <p><strong>Estado:</strong> ${p.estado}</p>
+
         <p><strong>Descrição:</strong> ${p.descricao}</p>
-        <a href="https://wa.me/55${p.whatsapp}" target="_blank">Chamar cliente</a>
+
+        <div class="status ${classeStatus}">
+          ${p.status || "Pendente"}
+        </div>
+
+        <div class="acoes">
+
+          <a href="https://wa.me/55${p.whatsapp}" target="_blank">
+            <button class="btn3">
+              WhatsApp
+            </button>
+          </a>
+
+          <button class="btn1"
+          onclick="alterarStatus(${p.id}, 'Em atendimento')">
+
+            Em atendimento
+
+          </button>
+
+          <button class="btn2"
+          onclick="alterarStatus(${p.id}, 'Finalizado')">
+
+            Finalizado
+
+          </button>
+
+        </div>
+
       </div>
+
     `;
+
   });
+
+}
+
+async function alterarStatus(id, status){
+
+  await fetch(`/status/${id}`, {
+
+    method:"PUT",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({ status })
+
+  });
+
+  carregarPedidos();
+
 }
 
 carregarPedidos();
+
 </script>
 
 </body>
