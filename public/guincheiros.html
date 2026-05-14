@@ -68,6 +68,7 @@ if(localStorage.getItem("adminLogado") !== "sim"){
   <input id="whatsapp" placeholder="WhatsApp com DDI. Ex: 5548999999999" required>
   <input id="cidade" placeholder="Cidade" required>
   <input id="estado" placeholder="Estado. Ex: SC" required>
+  <input id="senha" placeholder="Senha de acesso do guincheiro" required>
   <button>Cadastrar Guincheiro</button>
 </form>
 
@@ -83,7 +84,8 @@ form.addEventListener("submit", async (e) => {
     nome: document.getElementById("nome").value,
     whatsapp: document.getElementById("whatsapp").value,
     cidade: document.getElementById("cidade").value,
-    estado: document.getElementById("estado").value
+    estado: document.getElementById("estado").value,
+    senha: document.getElementById("senha").value
   };
 
   await fetch("/guincheiros", {
@@ -116,6 +118,8 @@ async function carregarGuincheiros(){
         <p><strong>WhatsApp:</strong> ${g.whatsapp}</p>
         <p><strong>Cidade:</strong> ${g.cidade}</p>
         <p><strong>Estado:</strong> ${g.estado}</p>
+        <p><strong>Senha:</strong> ${g.senha || "Não cadastrada"}</p>
+        <p><a href="/login-guincheiro.html">Login do guincheiro</a></p>
         <button class="excluir" onclick="excluirGuincheiro(${g.id})">Excluir</button>
       </div>
     `;
