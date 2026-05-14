@@ -32,20 +32,22 @@ db.connect((err) => {
         whatsapp VARCHAR(20),
         cidade VARCHAR(100),
         estado VARCHAR(10),
-        descricao TEXT
+        bairro VARCHAR(100),
+        endereco VARCHAR(255),
+        referencia VARCHAR(255),
+        latitude VARCHAR(50),
+        longitude VARCHAR(50),
+        descricao TEXT,
+        status VARCHAR(30) DEFAULT 'Pendente'
       )
     `);
 
-    db.query(`
-      ALTER TABLE solicitacoes_nova 
-      ADD COLUMN status VARCHAR(30) DEFAULT 'Pendente'
-    `, (err) => {
-      if (err) {
-        console.log("Status já existe ou erro:", err.message);
-      } else {
-        console.log("✅ Coluna status criada!");
-      }
-    });
+    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN bairro VARCHAR(100)`, () => {});
+    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN endereco VARCHAR(255)`, () => {});
+    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN referencia VARCHAR(255)`, () => {});
+    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN latitude VARCHAR(50)`, () => {});
+    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN longitude VARCHAR(50)`, () => {});
+    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN status VARCHAR(30) DEFAULT 'Pendente'`, () => {});
 
     db.query(`
       CREATE TABLE IF NOT EXISTS guincheiros (
@@ -64,13 +66,24 @@ app.get("/", (req, res) => {
 });
 
 app.post("/solicitar", (req, res) => {
-  const { nome, whatsapp, cidade, estado, descricao } = req.body;
+  const {
+    nome,
+    whatsapp,
+    cidade,
+    estado,
+    bairro,
+    endereco,
+    referencia,
+    latitude,
+    longitude,
+    descricao
+  } = req.body;
 
   db.query(
     `INSERT INTO solicitacoes_nova
-    (nome, whatsapp, cidade, estado, descricao, status)
-    VALUES (?, ?, ?, ?, ?, ?)`,
-    [nome, whatsapp, cidade, estado, descricao, "Pendente"],
+    (nome, whatsapp, cidade, estado, bairro, endereco, referencia, latitude, longitude, descricao, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nome, whatsapp, cidade, estado, bairro, endereco, referencia, latitude, longitude, descricao, "Pendente"],
     (err) => {
       if (err) {
         console.log(err);
@@ -84,10 +97,7 @@ app.post("/solicitar", (req, res) => {
         LIMIT 1`,
         [cidade, estado],
         (err2, result) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({ erro: "Erro ao buscar guincheiro" });
-          }
+          if (err2) return res.json({ erro: "Erro ao buscar guincheiro" });
 
           if (result.length === 0) {
             return res.json({ msg: "Nenhum guincheiro encontrado" });
@@ -95,12 +105,24 @@ app.post("/solicitar", (req, res) => {
 
           const g = result[0];
 
+          const mapa = latitude && longitude
+            ? `https://www.google.com/maps?q=${latitude},${longitude}`
+            : "Localização não informada";
+
           const link = `https://wa.me/${g.whatsapp}?text=🚨 Novo pedido de guincho
 
 Cliente: ${nome}
-Cidade: ${cidade}
-Estado: ${estado}
-Descrição: ${descricao}`;
+WhatsApp: ${whatsapp}
+
+Cidade: ${cidade}/${estado}
+Bairro: ${bairro || "Não informado"}
+Endereço: ${endereco || "Não informado"}
+Referência: ${referencia || "Não informado"}
+
+Descrição: ${descricao}
+
+📍 Localização:
+${mapa}`;
 
           res.json({ sucesso: true, whatsapp: link });
         }
@@ -111,28 +133,19 @@ Descrição: ${descricao}`;
 
 app.get("/pedidos", (req, res) => {
   db.query("SELECT * FROM solicitacoes_nova ORDER BY id DESC", (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.json({ erro: "Erro ao buscar pedidos" });
-    }
-
+    if (err) return res.json({ erro: "Erro ao buscar pedidos" });
     res.json(result);
   });
 });
 
 app.put("/status/:id", (req, res) => {
   const { status } = req.body;
-  const id = req.params.id;
 
   db.query(
     "UPDATE solicitacoes_nova SET status = ? WHERE id = ?",
-    [status, id],
+    [status, req.params.id],
     (err) => {
-      if (err) {
-        console.log(err);
-        return res.json({ erro: "Erro ao atualizar status" });
-      }
-
+      if (err) return res.json({ erro: "Erro ao atualizar status" });
       res.json({ sucesso: true });
     }
   );
