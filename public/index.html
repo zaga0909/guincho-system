@@ -3,173 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Vadeco'S Guinchos</title>
 
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ff8c00">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #071a33;
-      color: white;
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
     }
 
-    header {
-      padding: 22px 8%;
-      background: #061426;
-      border-bottom: 2px solid #ff8c00;
+    body{
+      font-family:Arial, sans-serif;
+      background:#071a33;
+      color:white;
     }
 
-    .logo {
-      font-size: 26px;
-      font-weight: bold;
-      color: #ff8c00;
+    header{
+      padding:22px 8%;
+      background:#061426;
+      border-bottom:2px solid #ff8c00;
     }
 
-    .logo span { color: #2f9bff; }
-
-    .hero {
-      padding: 70px 8%;
-      display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 40px;
-      align-items: center;
+    .logo{
+      font-size:26px;
+      font-weight:bold;
+      color:#ff8c00;
     }
 
-    h1 {
-      font-size: 44px;
-      margin-bottom: 18px;
+    .logo span{
+      color:#2f9bff;
     }
 
-    h1 span { color: #ff8c00; }
-
-    p {
-      font-size: 18px;
-      line-height: 1.6;
-      color: #dce8ff;
+    .hero{
+      padding:70px 8%;
+      display:grid;
+      grid-template-columns:1fr 420px;
+      gap:40px;
+      align-items:center;
     }
 
-    .cards {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 24px;
+    h1{
+      font-size:44px;
+      margin-bottom:18px;
     }
 
-    .card {
-      background: #0d2a50;
-      border: 1px solid #174b88;
-      padding: 14px;
-      border-radius: 12px;
+    h1 span{
+      color:#ff8c00;
     }
 
-    .form-box {
-      background: white;
-      color: #111;
-      padding: 28px;
-      border-radius: 18px;
-      box-shadow: 0 15px 35px rgba(0,0,0,.35);
+    p{
+      font-size:18px;
+      line-height:1.6;
+      color:#dce8ff;
     }
 
-    .form-box h2 {
-      color: #071a33;
-      margin-bottom: 15px;
+    .cards{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:24px;
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .card{
+      background:#0d2a50;
+      border:1px solid #174b88;
+      padding:14px;
+      border-radius:12px;
     }
 
-    input, textarea, button {
-      padding: 13px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 15px;
+    .form-box{
+      background:white;
+      color:#111;
+      padding:28px;
+      border-radius:18px;
+      box-shadow:0 15px 35px rgba(0,0,0,.35);
     }
 
-    textarea {
-      resize: none;
-      min-height: 90px;
+    .form-box h2{
+      color:#071a33;
+      margin-bottom:15px;
     }
 
-    button {
-      background: #ff8c00;
-      color: white;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
     }
 
-    .gps {
-      background: #2f9bff;
+    input, textarea, button{
+      padding:13px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:15px;
     }
 
-    .status {
-      font-size: 14px;
-      color: #071a33;
-      margin-top: 5px;
+    textarea{
+      resize:none;
+      min-height:90px;
     }
 
-    section {
-      padding: 50px 8%;
-      background: #081f3d;
+    button{
+      background:#ff8c00;
+      color:white;
+      font-weight:bold;
+      border:none;
+      cursor:pointer;
     }
 
-    section h2 {
-      color: #ff8c00;
-      margin-bottom: 15px;
+    .gps{
+      background:#2f9bff;
     }
 
-    footer {
-      text-align: center;
-      padding: 25px;
-      background: #061426;
-      color: #aaa;
+    .status{
+      font-size:14px;
+      color:#071a33;
+      margin-top:5px;
     }
 
-    @media (max-width: 850px) {
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 45px 6%;
+    section{
+      padding:50px 8%;
+      background:#081f3d;
+    }
+
+    section h2{
+      color:#ff8c00;
+      margin-bottom:15px;
+    }
+
+    footer{
+      text-align:center;
+      padding:25px;
+      background:#061426;
+      color:#aaa;
+    }
+
+    @media (max-width:850px){
+
+      .hero{
+        grid-template-columns:1fr;
+        padding:45px 6%;
       }
 
-      h1 {
-        font-size: 34px;
+      h1{
+        font-size:34px;
       }
+
     }
+
   </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">Vadeco'S <span>Guinchos</span></div>
+  <div class="logo">
+    Vadeco'S <span>Guinchos</span>
+  </div>
 </header>
 
 <main class="hero">
 
   <div>
-    <h1>Guincho rápido e seguro para sua <span>região</span></h1>
+
+    <h1>
+      Guincho rápido e seguro para sua <span>região</span>
+    </h1>
 
     <p>
-      Atendimento para veículos de leilão, remoções, panes, transporte e suporte em estrada.
+      Atendimento para veículos de leilão, remoções, panes,
+      transporte e suporte em estrada.
       Solicite pelo site e seja direcionado para o responsável da sua região.
     </p>
 
     <div class="cards">
-      <div class="card">🚛 Guincho 24h</div>
-      <div class="card">📍 Atendimento por região</div>
-      <div class="card">📲 Chamada via WhatsApp</div>
+
+      <div class="card">
+        🚛 Guincho 24h
+      </div>
+
+      <div class="card">
+        📍 Atendimento por região
+      </div>
+
+      <div class="card">
+        📲 Chamada via WhatsApp
+      </div>
+
     </div>
+
   </div>
 
   <div class="form-box">
+
     <h2>Solicitar Guincho</h2>
 
     <form id="formulario">
+
       <input type="text" id="nome" placeholder="Seu nome" required>
+
       <input type="text" id="whatsapp" placeholder="Seu WhatsApp" required>
 
       <button type="button" class="gps" onclick="pegarLocalizacao()">
@@ -181,30 +218,45 @@
       </div>
 
       <input type="text" id="cidade" placeholder="Cidade" required>
+
       <input type="text" id="estado" placeholder="Estado. Ex: SC" required>
 
-      <textarea id="descricao" placeholder="Descreva o problema do veículo"></textarea>
+      <textarea id="descricao"
+      placeholder="Descreva o problema do veículo"></textarea>
 
-      <button type="submit">Solicitar atendimento</button>
+      <button type="submit">
+        Solicitar atendimento
+      </button>
+
     </form>
+
   </div>
 
 </main>
 
 <section>
+
   <h2>Sobre a Vadeco'S Guinchos</h2>
+
   <p>
-    A Vadeco'S Guinchos atua com suporte, remoção e transporte de veículos,
-    oferecendo atendimento ágil, organizado e direcionado para cada região.
+    A Vadeco'S Guinchos atua com suporte,
+    remoção e transporte de veículos,
+    oferecendo atendimento ágil e organizado.
   </p>
+
 </section>
 
 <section>
+
   <h2>Como funciona</h2>
+
   <p>
-    Você informa seus dados, cidade, estado e o problema do veículo.
-    O sistema registra o pedido e direciona para o WhatsApp do responsável.
+    Você informa seus dados, cidade,
+    estado e o problema do veículo.
+    O sistema registra o pedido e direciona
+    para o WhatsApp do responsável.
   </p>
+
 </section>
 
 <footer>
@@ -212,21 +264,28 @@
 </footer>
 
 <script>
-async function pegarLocalizacao() {
+
+async function pegarLocalizacao(){
+
   const status = document.getElementById("statusGps");
 
-  if (!navigator.geolocation) {
+  if(!navigator.geolocation){
+
     status.innerText = "Seu navegador não suporta localização.";
+
     return;
+
   }
 
-  status.innerText = "Buscando sua localização...";
+  status.innerText = "Buscando localização...";
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
+
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
-    try {
+    try{
+
       const resposta = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
       );
@@ -237,64 +296,99 @@ async function pegarLocalizacao() {
         dados.address.city ||
         dados.address.town ||
         dados.address.village ||
-        dados.address.municipality ||
         "";
 
       const estado = dados.address.state || "";
 
       document.getElementById("cidade").value = cidade;
 
-      if (estado.includes("Santa Catarina")) {
+      if(estado.includes("Santa Catarina")){
+
         document.getElementById("estado").value = "SC";
-      } else if (estado.includes("Paraná")) {
-        document.getElementById("estado").value = "PR";
-      } else if (estado.includes("Rio Grande do Sul")) {
-        document.getElementById("estado").value = "RS";
-      } else {
+
+      }else{
+
         document.getElementById("estado").value = estado;
+
       }
 
-      status.innerText = "Localização preenchida com sucesso.";
+      status.innerText = "Localização preenchida.";
 
-    } catch (erro) {
-      status.innerText = "Não consegui detectar a cidade. Preencha manualmente.";
+    }catch(erro){
+
+      status.innerText = "Erro ao detectar localização.";
+
     }
 
   }, () => {
-    status.innerText = "Permissão negada. Preencha manualmente.";
+
+    status.innerText = "Permissão negada.";
+
   });
+
 }
 
 const form = document.getElementById("formulario");
 
 form.addEventListener("submit", async (e) => {
+
   e.preventDefault();
 
   const dados = {
+
     nome: document.getElementById("nome").value,
+
     whatsapp: document.getElementById("whatsapp").value,
+
     cidade: document.getElementById("cidade").value,
+
     estado: document.getElementById("estado").value,
+
     descricao: document.getElementById("descricao").value
+
   };
 
   const resposta = await fetch("/solicitar", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
     },
-    body: JSON.stringify(dados)
+
+    body:JSON.stringify(dados)
+
   });
 
   const resultado = await resposta.json();
 
-  if (resultado.whatsapp) {
+  if(resultado.whatsapp){
+
     alert("Pedido enviado!");
+
     window.location.href = resultado.whatsapp;
-  } else {
+
+  }else{
+
     alert(resultado.msg || resultado.erro || "Erro ao enviar");
+
   }
+
 });
+
+// PWA
+if("serviceWorker" in navigator){
+
+  navigator.serviceWorker.register("/service-worker.js")
+
+  .then(() => {
+
+    console.log("PWA funcionando");
+
+  });
+
+}
+
 </script>
 
 </body>
