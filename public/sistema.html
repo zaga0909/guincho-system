@@ -101,6 +101,12 @@
       color:white;
     }
 
+    .logout{
+      background:red;
+      color:white;
+      margin-bottom:25px;
+    }
+
     a{
       text-decoration:none;
     }
@@ -110,6 +116,20 @@
 </head>
 <body>
 
+<script>
+
+if(localStorage.getItem("adminLogado") !== "sim"){
+
+  window.location.href = "/login.html";
+
+}
+
+</script>
+
+<button class="logout" onclick="sair()">
+  Sair
+</button>
+
 <h1>🚛 Painel Vadeco'S Guinchos</h1>
 
 <div id="lista">
@@ -117,6 +137,14 @@
 </div>
 
 <script>
+
+function sair(){
+
+  localStorage.removeItem("adminLogado");
+
+  window.location.href = "/login.html";
+
+}
 
 async function carregarPedidos(){
 

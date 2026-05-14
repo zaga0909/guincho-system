@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Vadeco'S Guinchos</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #071a33;
+      color: white;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .box {
+      background: white;
+      color: #111;
+      padding: 30px;
+      border-radius: 16px;
+      width: 320px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #ff8c00;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Login Admin</h2>
+  <input type="password" id="senha" placeholder="Senha">
+  <button onclick="entrar()">Entrar</button>
+</div>
+
+<script>
+function entrar() {
+  const senha = document.getElementById("senha").value;
+
+  if (senha === "vadeco123") {
+    localStorage.setItem("adminLogado", "sim");
+    window.location.href = "/sistema.html";
+  } else {
+    alert("Senha incorreta");
+  }
+}
+</script>
+
+</body>
+</html>
