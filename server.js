@@ -20,13 +20,9 @@ const db = mysql.createConnection({
 });
 
 db.connect((err) => {
-
   if (err) {
-
     console.log("❌ Erro banco:", err);
-
   } else {
-
     console.log("✅ Banco conectado!");
 
     db.query(`
@@ -47,176 +43,89 @@ db.connect((err) => {
     `);
 
     db.query(`
-      CREATE TABLE IF NOT EXISTS guincheiros (
+      CREATE TABLE IF NOT EXISTS guincheiros_nova (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(100),
         whatsapp VARCHAR(20),
         cidade VARCHAR(100),
-        estado VARCHAR(10)
+        estado VARCHAR(10),
+        senha VARCHAR(100)
       )
     `);
-
-    // ADICIONAR COLUNA SENHA
-    db.query(`
-      ALTER TABLE guincheiros
-      ADD COLUMN senha VARCHAR(100)
-    `, (err) => {
-
-      if(err){
-
-        console.log("Senha já existe.");
-
-      }else{
-
-        console.log("✅ Coluna senha criada!");
-
-      }
-
-    });
-
   }
-
 });
 
-// HOME
 app.get("/", (req, res) => {
-
   res.sendFile(path.join(__dirname, "public", "index.html"));
-
 });
 
 // LOGIN GUINCHEIRO
 app.post("/login-guincheiro", (req, res) => {
-
   const { whatsapp, senha } = req.body;
 
   db.query(
-
-    `SELECT * FROM guincheiros
-    WHERE whatsapp=? AND senha=?`,
-
+    `SELECT * FROM guincheiros_nova WHERE whatsapp=? AND senha=?`,
     [whatsapp, senha],
-
     (err, result) => {
+      if (err) return res.json({ erro: "Erro login" });
 
-      if(err){
-
-        return res.json({
-          erro:"Erro login"
-        });
-
-      }
-
-      if(result.length === 0){
-
-        return res.json({
-          erro:"WhatsApp ou senha inválidos"
-        });
-
+      if (result.length === 0) {
+        return res.json({ erro: "WhatsApp ou senha inválidos" });
       }
 
       res.json({
-        sucesso:true,
-        guincheiro:result[0]
+        sucesso: true,
+        guincheiro: result[0]
       });
-
     }
-
   );
-
 });
 
 // CADASTRAR GUINCHEIRO
 app.post("/guincheiros", (req, res) => {
-
-  const {
-    nome,
-    whatsapp,
-    cidade,
-    estado,
-    senha
-  } = req.body;
+  const { nome, whatsapp, cidade, estado, senha } = req.body;
 
   db.query(
-
-    `INSERT INTO guincheiros
+    `INSERT INTO guincheiros_nova
     (nome, whatsapp, cidade, estado, senha)
-
     VALUES (?, ?, ?, ?, ?)`,
-
-    [
-      nome,
-      whatsapp,
-      cidade,
-      estado,
-      senha
-    ],
-
+    [nome, whatsapp, cidade, estado, senha],
     (err) => {
-
-      if(err){
-
+      if (err) {
         console.log(err);
-
-        return res.json({
-          erro:"Erro cadastro"
-        });
-
+        return res.json({ erro: "Erro cadastro" });
       }
 
-      res.json({
-        sucesso:true
-      });
-
+      res.json({ sucesso: true });
     }
-
   );
-
 });
 
 // LISTAR GUINCHEIROS
 app.get("/guincheiros", (req, res) => {
-
   db.query(
-
-    `SELECT * FROM guincheiros
-    ORDER BY id DESC`,
-
+    `SELECT * FROM guincheiros_nova ORDER BY id DESC`,
     (err, result) => {
-
+      if (err) return res.json({ erro: "Erro ao buscar guincheiros" });
       res.json(result);
-
     }
-
   );
-
 });
 
 // EXCLUIR GUINCHEIRO
 app.delete("/guincheiros/:id", (req, res) => {
-
   db.query(
-
-    `DELETE FROM guincheiros
-    WHERE id=?`,
-
+    `DELETE FROM guincheiros_nova WHERE id=?`,
     [req.params.id],
-
-    () => {
-
-      res.json({
-        sucesso:true
-      });
-
+    (err) => {
+      if (err) return res.json({ erro: "Erro ao excluir" });
+      res.json({ sucesso: true });
     }
-
   );
-
 });
 
 // NOVO PEDIDO
 app.post("/solicitar", (req, res) => {
-
   const {
     nome,
     whatsapp,
@@ -231,14 +140,10 @@ app.post("/solicitar", (req, res) => {
   } = req.body;
 
   db.query(
-
     `INSERT INTO solicitacoes_nova
-    (nome, whatsapp, cidade, estado,
-    bairro, endereco, referencia,
+    (nome, whatsapp, cidade, estado, bairro, endereco, referencia,
     latitude, longitude, descricao, status)
-
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-
     [
       nome,
       whatsapp,
@@ -252,134 +157,83 @@ app.post("/solicitar", (req, res) => {
       descricao,
       "Pendente"
     ],
-
     (err) => {
-
-      if(err){
-
+      if (err) {
         console.log(err);
-
-        return res.json({
-          erro:"Erro pedido"
-        });
-
+        return res.json({ erro: "Erro pedido" });
       }
 
       db.query(
-
-        `SELECT * FROM guincheiros
+        `SELECT * FROM guincheiros_nova
         WHERE LOWER(cidade)=LOWER(?)
         AND UPPER(estado)=UPPER(?)
         LIMIT 1`,
-
         [cidade, estado],
-
         (err2, result) => {
+          if (err2) return res.json({ erro: "Erro ao buscar guincheiro" });
 
-          if(result.length === 0){
-
-            return res.json({
-              msg:"Nenhum guincheiro encontrado"
-            });
-
+          if (result.length === 0) {
+            return res.json({ msg: "Nenhum guincheiro encontrado" });
           }
 
           const g = result[0];
 
           const mapa =
-
             latitude && longitude
+              ? `https://www.google.com/maps?q=${latitude},${longitude}`
+              : "Sem GPS";
 
-            ?
-
-            `https://www.google.com/maps?q=${latitude},${longitude}`
-
-            :
-
-            "Sem GPS";
-
-          const link =
-
-          `https://wa.me/${g.whatsapp}?text=
-
+          const link = `https://wa.me/${g.whatsapp}?text=
 🚨 Novo pedido de guincho
 
 Cliente: ${nome}
+WhatsApp: ${whatsapp}
 
 Cidade: ${cidade}/${estado}
-
 Bairro: ${bairro}
-
 Endereço: ${endereco}
-
 Referência: ${referencia}
 
 Descrição: ${descricao}
 
 📍 ${mapa}
-
 `;
 
           res.json({
-            sucesso:true,
-            whatsapp:link
+            sucesso: true,
+            whatsapp: link
           });
-
         }
-
       );
-
     }
-
   );
-
 });
 
 // PEDIDOS
 app.get("/pedidos", (req, res) => {
-
   db.query(
-
-    `SELECT * FROM solicitacoes_nova
-    ORDER BY id DESC`,
-
+    `SELECT * FROM solicitacoes_nova ORDER BY id DESC`,
     (err, result) => {
-
+      if (err) return res.json({ erro: "Erro ao buscar pedidos" });
       res.json(result);
-
     }
-
   );
-
 });
 
 // STATUS
 app.put("/status/:id", (req, res) => {
-
   const { status } = req.body;
 
   db.query(
-
-    `UPDATE solicitacoes_nova
-    SET status=?
-    WHERE id=?`,
-
+    `UPDATE solicitacoes_nova SET status=? WHERE id=?`,
     [status, req.params.id],
-
-    () => {
-
-      res.json({
-        sucesso:true
-      });
-
+    (err) => {
+      if (err) return res.json({ erro: "Erro ao atualizar status" });
+      res.json({ sucesso: true });
     }
-
   );
-
 });
 
 app.listen(process.env.PORT || 3000, () => {
-
   console.log("🚀 Servidor online!");
-
 });
