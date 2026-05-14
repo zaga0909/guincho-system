@@ -52,15 +52,27 @@ db.connect((err) => {
         nome VARCHAR(100),
         whatsapp VARCHAR(20),
         cidade VARCHAR(100),
-        estado VARCHAR(10),
-        senha VARCHAR(100)
+        estado VARCHAR(10)
       )
     `);
 
+    // ADICIONAR COLUNA SENHA
     db.query(`
       ALTER TABLE guincheiros
       ADD COLUMN senha VARCHAR(100)
-    `, () => {});
+    `, (err) => {
+
+      if(err){
+
+        console.log("Senha já existe.");
+
+      }else{
+
+        console.log("✅ Coluna senha criada!");
+
+      }
+
+    });
 
   }
 
@@ -87,25 +99,113 @@ app.post("/login-guincheiro", (req, res) => {
 
     (err, result) => {
 
-      if (err) {
+      if(err){
 
         return res.json({
-          erro: "Erro login"
+          erro:"Erro login"
         });
 
       }
 
-      if (result.length === 0) {
+      if(result.length === 0){
 
         return res.json({
-          erro: "WhatsApp ou senha inválidos"
+          erro:"WhatsApp ou senha inválidos"
         });
 
       }
 
       res.json({
-        sucesso: true,
-        guincheiro: result[0]
+        sucesso:true,
+        guincheiro:result[0]
+      });
+
+    }
+
+  );
+
+});
+
+// CADASTRAR GUINCHEIRO
+app.post("/guincheiros", (req, res) => {
+
+  const {
+    nome,
+    whatsapp,
+    cidade,
+    estado,
+    senha
+  } = req.body;
+
+  db.query(
+
+    `INSERT INTO guincheiros
+    (nome, whatsapp, cidade, estado, senha)
+
+    VALUES (?, ?, ?, ?, ?)`,
+
+    [
+      nome,
+      whatsapp,
+      cidade,
+      estado,
+      senha
+    ],
+
+    (err) => {
+
+      if(err){
+
+        console.log(err);
+
+        return res.json({
+          erro:"Erro cadastro"
+        });
+
+      }
+
+      res.json({
+        sucesso:true
+      });
+
+    }
+
+  );
+
+});
+
+// LISTAR GUINCHEIROS
+app.get("/guincheiros", (req, res) => {
+
+  db.query(
+
+    `SELECT * FROM guincheiros
+    ORDER BY id DESC`,
+
+    (err, result) => {
+
+      res.json(result);
+
+    }
+
+  );
+
+});
+
+// EXCLUIR GUINCHEIRO
+app.delete("/guincheiros/:id", (req, res) => {
+
+  db.query(
+
+    `DELETE FROM guincheiros
+    WHERE id=?`,
+
+    [req.params.id],
+
+    () => {
+
+      res.json({
+        sucesso:true
       });
 
     }
@@ -155,12 +255,12 @@ app.post("/solicitar", (req, res) => {
 
     (err) => {
 
-      if (err) {
+      if(err){
 
         console.log(err);
 
         return res.json({
-          erro: "Erro ao salvar"
+          erro:"Erro pedido"
         });
 
       }
@@ -176,10 +276,10 @@ app.post("/solicitar", (req, res) => {
 
         (err2, result) => {
 
-          if (result.length === 0) {
+          if(result.length === 0){
 
             return res.json({
-              msg: "Nenhum guincheiro encontrado"
+              msg:"Nenhum guincheiro encontrado"
             });
 
           }
@@ -187,13 +287,19 @@ app.post("/solicitar", (req, res) => {
           const g = result[0];
 
           const mapa =
+
             latitude && longitude
+
             ?
+
             `https://www.google.com/maps?q=${latitude},${longitude}`
+
             :
+
             "Sem GPS";
 
           const link =
+
           `https://wa.me/${g.whatsapp}?text=
 
 🚨 Novo pedido de guincho
@@ -259,92 +365,6 @@ app.put("/status/:id", (req, res) => {
     WHERE id=?`,
 
     [status, req.params.id],
-
-    () => {
-
-      res.json({
-        sucesso:true
-      });
-
-    }
-
-  );
-
-});
-
-// GUINCHEIROS
-app.get("/guincheiros", (req, res) => {
-
-  db.query(
-
-    `SELECT * FROM guincheiros
-    ORDER BY id DESC`,
-
-    (err, result) => {
-
-      res.json(result);
-
-    }
-
-  );
-
-});
-
-// CADASTRAR GUINCHEIRO
-app.post("/guincheiros", (req, res) => {
-
-  const {
-    nome,
-    whatsapp,
-    cidade,
-    estado,
-    senha
-  } = req.body;
-
-  db.query(
-
-    `INSERT INTO guincheiros
-    (nome, whatsapp, cidade, estado, senha)
-
-    VALUES (?, ?, ?, ?, ?)`,
-
-    [
-      nome,
-      whatsapp,
-      cidade,
-      estado,
-      senha
-    ],
-
-    (err) => {
-
-      if (err) {
-
-        return res.json({
-          erro:"Erro cadastro"
-        });
-
-      }
-
-      res.json({
-        sucesso:true
-      });
-
-    }
-
-  );
-
-});
-
-// EXCLUIR
-app.delete("/guincheiros/:id", (req, res) => {
-
-  db.query(
-
-    `DELETE FROM guincheiros
-    WHERE id=?`,
-
-    [req.params.id],
 
     () => {
 
