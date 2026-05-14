@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel - Vadeco'S Guinchos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #071a33;
+      color: white;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #ff8c00;
+      margin-bottom: 20px;
+    }
+
+    .pedido {
+      background: white;
+      color: #111;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .pedido strong {
+      color: #071a33;
+    }
+
+    a {
+      color: #ff8c00;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Painel de Pedidos - Vadeco'S Guinchos</h1>
+
+<div id="lista">Carregando pedidos...</div>
+
+<script>
+async function carregarPedidos() {
+  const resposta = await fetch("/pedidos");
+  const pedidos = await resposta.json();
+
+  const lista = document.getElementById("lista");
+
+  if (!pedidos.length) {
+    lista.innerHTML = "Nenhum pedido encontrado.";
+    return;
+  }
+
+  lista.innerHTML = "";
+
+  pedidos.forEach(p => {
+    lista.innerHTML += `
+      <div class="pedido">
+        <p><strong>Nome:</strong> ${p.nome}</p>
+        <p><strong>WhatsApp:</strong> ${p.whatsapp}</p>
+        <p><strong>Cidade:</strong> ${p.cidade}</p>
+        <p><strong>Estado:</strong> ${p.estado}</p>
+        <p><strong>Descrição:</strong> ${p.descricao}</p>
+        <a href="https://wa.me/55${p.whatsapp}" target="_blank">Chamar cliente</a>
+      </div>
+    `;
+  });
+}
+
+carregarPedidos();
+</script>
+
+</body>
+</html>
