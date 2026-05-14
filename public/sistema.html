@@ -25,14 +25,32 @@
       justify-content:space-between;
       align-items:center;
       margin-bottom:30px;
+      gap:20px;
+      flex-wrap:wrap;
     }
 
     h1{
       color:#ff8c00;
     }
 
+    .topo-botoes{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     .logout{
       background:red;
+      color:white;
+      border:none;
+      padding:12px 18px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .btn3{
+      background:#ff8c00;
       color:white;
       border:none;
       padding:12px 18px;
@@ -139,11 +157,6 @@
       color:white;
     }
 
-    .btn3{
-      background:#ff8c00;
-      color:white;
-    }
-
     a{
       text-decoration:none;
     }
@@ -167,9 +180,19 @@ if(localStorage.getItem("adminLogado") !== "sim"){
 
   <h1>🚛 Painel Vadeco'S Guinchos</h1>
 
-  <button class="logout" onclick="sair()">
-    Sair
-  </button>
+  <div class="topo-botoes">
+
+    <a href="/guincheiros.html">
+      <button class="btn3">
+        Guincheiros
+      </button>
+    </a>
+
+    <button class="logout" onclick="sair()">
+      Sair
+    </button>
+
+  </div>
 
 </div>
 
@@ -217,7 +240,6 @@ async function carregarPedidos(){
 
   const pedidos = await resposta.json();
 
-  // DASHBOARD
   document.getElementById("totalPedidos").innerText = pedidos.length;
 
   document.getElementById("pendentes").innerText =
