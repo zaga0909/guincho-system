@@ -6,7 +6,11 @@
   <title>Central Operacional - Vadeco'S Guinchos</title>
 
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
 
     body {
       font-family: Arial;
@@ -24,7 +28,9 @@
       flex-wrap:wrap;
     }
 
-    h1 { color:#ff8c00; }
+    h1 {
+      color:#ff8c00;
+    }
 
     .topo-botoes {
       display:flex;
@@ -40,10 +46,25 @@
       font-weight:bold;
     }
 
-    .btn-laranja { background:#ff8c00; color:white; }
-    .btn-azul { background:#2f9bff; color:white; }
-    .btn-verde { background:#39d98a; color:white; }
-    .btn-vermelho { background:red; color:white; }
+    .btn-laranja {
+      background:#ff8c00;
+      color:white;
+    }
+
+    .btn-azul {
+      background:#2f9bff;
+      color:white;
+    }
+
+    .btn-verde {
+      background:#39d98a;
+      color:white;
+    }
+
+    .btn-vermelho {
+      background:red;
+      color:white;
+    }
 
     .dashboard {
       display:grid;
@@ -91,15 +112,22 @@
       box-shadow:0 10px 25px rgba(0,0,0,.25);
     }
 
-    .pedido.atendimento { border-left-color:#2f9bff; }
-    .pedido.finalizado { border-left-color:#39d98a; }
+    .pedido.atendimento {
+      border-left-color:#2f9bff;
+    }
+
+    .pedido.finalizado {
+      border-left-color:#39d98a;
+    }
 
     .pedido h2 {
       color:#071a33;
       margin-bottom:10px;
     }
 
-    .pedido p { margin:6px 0; }
+    .pedido p {
+      margin:6px 0;
+    }
 
     .status {
       display:inline-block;
@@ -109,9 +137,20 @@
       margin:12px 0;
     }
 
-    .pendente { background:#ffe08a; color:#111; }
-    .andamento { background:#5db2ff; color:white; }
-    .finalizado { background:#39d98a; color:white; }
+    .pendente {
+      background:#ffe08a;
+      color:#111;
+    }
+
+    .andamento {
+      background:#5db2ff;
+      color:white;
+    }
+
+    .finalizado {
+      background:#39d98a;
+      color:white;
+    }
 
     .acoes {
       display:flex;
@@ -120,7 +159,9 @@
       margin-top:12px;
     }
 
-    a { text-decoration:none; }
+    a {
+      text-decoration:none;
+    }
 
     .aviso {
       background:#ff8c00;
@@ -150,20 +191,37 @@ if(localStorage.getItem("adminLogado") !== "sim"){
 </script>
 
 <div class="topo">
+
   <h1>🚛 Central Operacional Vadeco'S Guinchos</h1>
 
   <div class="topo-botoes">
-    <button class="btn-azul" onclick="ativarNotificacoes()">Ativar Notificações</button>
 
-    <a href="/guincheiros.html">
-      <button class="btn-laranja">Guincheiros</button>
+    <button class="btn-azul" onclick="ativarNotificacoes()">
+      Ativar Notificações
+    </button>
+
+    <a href="/mapa.html">
+      <button class="btn-azul">
+        Mapa
+      </button>
     </a>
 
-    <button class="btn-vermelho" onclick="sair()">Sair</button>
+    <a href="/guincheiros.html">
+      <button class="btn-laranja">
+        Guincheiros
+      </button>
+    </a>
+
+    <button class="btn-vermelho" onclick="sair()">
+      Sair
+    </button>
+
   </div>
+
 </div>
 
 <div class="dashboard">
+
   <div class="card">
     <h2>Total de Pedidos</h2>
     <div class="numero" id="totalPedidos">0</div>
@@ -183,6 +241,7 @@ if(localStorage.getItem("adminLogado") !== "sim"){
     <h2>Finalizados</h2>
     <div class="numero" id="finalizados">0</div>
   </div>
+
 </div>
 
 <div id="avisoNovo" class="aviso">
@@ -194,104 +253,164 @@ if(localStorage.getItem("adminLogado") !== "sim"){
 <div id="lista">Carregando pedidos...</div>
 
 <script>
+
 let quantidadeAnterior = 0;
 let primeiraCarga = true;
 
 function sair(){
+
   localStorage.removeItem("adminLogado");
+
   window.location.href = "/login.html";
+
 }
 
 function ativarNotificacoes(){
+
   if("Notification" in window){
+
     Notification.requestPermission().then(() => {
+
       alert("Notificações ativadas!");
+
     });
+
   }else{
+
     alert("Seu navegador não suporta notificações.");
+
   }
+
 }
 
 function tocarSom(){
-  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+
+  const audio = new Audio(
+    "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+  );
+
   audio.play().catch(() => {});
+
 }
 
 function mostrarNotificacao(titulo, mensagem){
-  if("Notification" in window && Notification.permission === "granted"){
+
+  if("Notification" in window &&
+     Notification.permission === "granted"){
+
     new Notification(titulo, {
+
       body: mensagem,
       icon: "/icons/icon-512.png"
+
     });
+
   }
+
 }
 
 async function carregarPedidos(){
+
   const resposta = await fetch("/pedidos");
+
   const pedidos = await resposta.json();
 
-  if(!primeiraCarga && pedidos.length > quantidadeAnterior){
+  if(!primeiraCarga &&
+     pedidos.length > quantidadeAnterior){
+
     const novoPedido = pedidos[0];
 
     const aviso = document.getElementById("avisoNovo");
+
     aviso.style.display = "block";
 
     tocarSom();
 
     mostrarNotificacao(
+
       "Novo pedido de guincho",
+
       `${novoPedido.nome} - ${novoPedido.cidade}/${novoPedido.estado}`
+
     );
 
     setTimeout(() => {
+
       aviso.style.display = "none";
+
     }, 6000);
+
   }
 
   quantidadeAnterior = pedidos.length;
+
   primeiraCarga = false;
 
-  document.getElementById("totalPedidos").innerText = pedidos.length;
+  document.getElementById("totalPedidos").innerText =
+    pedidos.length;
 
   document.getElementById("pendentes").innerText =
-    pedidos.filter(p => !p.status || p.status === "Pendente").length;
+    pedidos.filter(p =>
+      !p.status || p.status === "Pendente"
+    ).length;
 
   document.getElementById("andamento").innerText =
-    pedidos.filter(p => p.status === "Em atendimento").length;
+    pedidos.filter(p =>
+      p.status === "Em atendimento"
+    ).length;
 
   document.getElementById("finalizados").innerText =
-    pedidos.filter(p => p.status === "Finalizado").length;
+    pedidos.filter(p =>
+      p.status === "Finalizado"
+    ).length;
 
   const lista = document.getElementById("lista");
 
   if(!pedidos.length){
+
     lista.innerHTML = "Nenhum pedido encontrado.";
+
     return;
+
   }
 
   lista.innerHTML = "";
 
   pedidos.forEach(p => {
+
     let classeStatus = "pendente";
     let classeCard = "";
 
     if(p.status === "Em atendimento"){
+
       classeStatus = "andamento";
       classeCard = "atendimento";
+
     }
 
     if(p.status === "Finalizado"){
+
       classeStatus = "finalizado";
       classeCard = "finalizado";
+
     }
 
     lista.innerHTML += `
+
       <div class="pedido ${classeCard}">
+
         <h2>${p.nome}</h2>
 
         <p><strong>WhatsApp:</strong> ${p.whatsapp}</p>
-        <p><strong>Cidade:</strong> ${p.cidade}</p>
-        <p><strong>Estado:</strong> ${p.estado}</p>
+
+        <p><strong>Cidade:</strong> ${p.cidade}/${p.estado}</p>
+
+        <p><strong>Bairro:</strong> ${p.bairro || "Não informado"}</p>
+
+        <p><strong>Endereço:</strong> ${p.endereco || "Não informado"}</p>
+
+        <p><strong>Referência:</strong> ${p.referencia || "Não informado"}</p>
+
         <p><strong>Descrição:</strong> ${p.descricao}</p>
 
         <div class="status ${classeStatus}">
@@ -299,40 +418,84 @@ async function carregarPedidos(){
         </div>
 
         <div class="acoes">
+
           <a href="https://wa.me/55${p.whatsapp}" target="_blank">
-            <button class="btn-laranja">Chamar Cliente</button>
+            <button class="btn-laranja">
+              Chamar Cliente
+            </button>
           </a>
 
-          <button class="btn-azul" onclick="alterarStatus(${p.id}, 'Em atendimento')">
+          <button class="btn-azul"
+          onclick="alterarStatus(${p.id}, 'Em atendimento')">
+
             Aceitar Corrida
+
           </button>
 
-          <button class="btn-verde" onclick="alterarStatus(${p.id}, 'Finalizado')">
+          <button class="btn-verde"
+          onclick="alterarStatus(${p.id}, 'Finalizado')">
+
             Finalizar
+
           </button>
 
-          <button class="btn-laranja" onclick="alterarStatus(${p.id}, 'Pendente')">
+          <button class="btn-laranja"
+          onclick="alterarStatus(${p.id}, 'Pendente')">
+
             Voltar para Pendente
+
           </button>
+
+          ${
+            p.latitude && p.longitude
+            ?
+            `
+            <a
+            href="https://www.google.com/maps?q=${p.latitude},${p.longitude}"
+            target="_blank">
+
+              <button class="btn-azul">
+                Abrir GPS
+              </button>
+
+            </a>
+            `
+            :
+            ""
+          }
+
         </div>
+
       </div>
+
     `;
+
   });
+
 }
 
 async function alterarStatus(id, status){
+
   await fetch(`/status/${id}`, {
+
     method:"PUT",
-    headers:{ "Content-Type":"application/json" },
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
     body:JSON.stringify({ status })
+
   });
 
   carregarPedidos();
+
 }
 
 carregarPedidos();
 
 setInterval(carregarPedidos, 5000);
+
 </script>
 
 </body>
