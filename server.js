@@ -20,9 +20,13 @@ const db = mysql.createConnection({
 });
 
 db.connect((err) => {
+
   if (err) {
+
     console.log("❌ Erro banco:", err);
+
   } else {
+
     console.log("✅ Banco conectado!");
 
     db.query(`
@@ -42,30 +46,77 @@ db.connect((err) => {
       )
     `);
 
-    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN bairro VARCHAR(100)`, () => {});
-    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN endereco VARCHAR(255)`, () => {});
-    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN referencia VARCHAR(255)`, () => {});
-    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN latitude VARCHAR(50)`, () => {});
-    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN longitude VARCHAR(50)`, () => {});
-    db.query(`ALTER TABLE solicitacoes_nova ADD COLUMN status VARCHAR(30) DEFAULT 'Pendente'`, () => {});
-
     db.query(`
       CREATE TABLE IF NOT EXISTS guincheiros (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(100),
         whatsapp VARCHAR(20),
         cidade VARCHAR(100),
-        estado VARCHAR(10)
+        estado VARCHAR(10),
+        senha VARCHAR(100)
       )
     `);
+
+    db.query(`
+      ALTER TABLE guincheiros
+      ADD COLUMN senha VARCHAR(100)
+    `, () => {});
+
   }
+
 });
 
+// HOME
 app.get("/", (req, res) => {
+
   res.sendFile(path.join(__dirname, "public", "index.html"));
+
 });
 
+// LOGIN GUINCHEIRO
+app.post("/login-guincheiro", (req, res) => {
+
+  const { whatsapp, senha } = req.body;
+
+  db.query(
+
+    `SELECT * FROM guincheiros
+    WHERE whatsapp=? AND senha=?`,
+
+    [whatsapp, senha],
+
+    (err, result) => {
+
+      if (err) {
+
+        return res.json({
+          erro: "Erro login"
+        });
+
+      }
+
+      if (result.length === 0) {
+
+        return res.json({
+          erro: "WhatsApp ou senha inválidos"
+        });
+
+      }
+
+      res.json({
+        sucesso: true,
+        guincheiro: result[0]
+      });
+
+    }
+
+  );
+
+});
+
+// NOVO PEDIDO
 app.post("/solicitar", (req, res) => {
+
   const {
     nome,
     whatsapp,
@@ -80,105 +131,235 @@ app.post("/solicitar", (req, res) => {
   } = req.body;
 
   db.query(
+
     `INSERT INTO solicitacoes_nova
-    (nome, whatsapp, cidade, estado, bairro, endereco, referencia, latitude, longitude, descricao, status)
+    (nome, whatsapp, cidade, estado,
+    bairro, endereco, referencia,
+    latitude, longitude, descricao, status)
+
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nome, whatsapp, cidade, estado, bairro, endereco, referencia, latitude, longitude, descricao, "Pendente"],
+
+    [
+      nome,
+      whatsapp,
+      cidade,
+      estado,
+      bairro,
+      endereco,
+      referencia,
+      latitude,
+      longitude,
+      descricao,
+      "Pendente"
+    ],
+
     (err) => {
+
       if (err) {
+
         console.log(err);
-        return res.json({ erro: "Erro ao salvar solicitação" });
+
+        return res.json({
+          erro: "Erro ao salvar"
+        });
+
       }
 
       db.query(
+
         `SELECT * FROM guincheiros
-        WHERE LOWER(cidade) = LOWER(?)
-        AND UPPER(estado) = UPPER(?)
+        WHERE LOWER(cidade)=LOWER(?)
+        AND UPPER(estado)=UPPER(?)
         LIMIT 1`,
+
         [cidade, estado],
+
         (err2, result) => {
-          if (err2) return res.json({ erro: "Erro ao buscar guincheiro" });
 
           if (result.length === 0) {
-            return res.json({ msg: "Nenhum guincheiro encontrado" });
+
+            return res.json({
+              msg: "Nenhum guincheiro encontrado"
+            });
+
           }
 
           const g = result[0];
 
-          const mapa = latitude && longitude
-            ? `https://www.google.com/maps?q=${latitude},${longitude}`
-            : "Localização não informada";
+          const mapa =
+            latitude && longitude
+            ?
+            `https://www.google.com/maps?q=${latitude},${longitude}`
+            :
+            "Sem GPS";
 
-          const link = `https://wa.me/${g.whatsapp}?text=🚨 Novo pedido de guincho
+          const link =
+          `https://wa.me/${g.whatsapp}?text=
+
+🚨 Novo pedido de guincho
 
 Cliente: ${nome}
-WhatsApp: ${whatsapp}
 
 Cidade: ${cidade}/${estado}
-Bairro: ${bairro || "Não informado"}
-Endereço: ${endereco || "Não informado"}
-Referência: ${referencia || "Não informado"}
+
+Bairro: ${bairro}
+
+Endereço: ${endereco}
+
+Referência: ${referencia}
 
 Descrição: ${descricao}
 
-📍 Localização:
-${mapa}`;
+📍 ${mapa}
 
-          res.json({ sucesso: true, whatsapp: link });
+`;
+
+          res.json({
+            sucesso:true,
+            whatsapp:link
+          });
+
         }
+
       );
+
     }
+
   );
+
 });
 
+// PEDIDOS
 app.get("/pedidos", (req, res) => {
-  db.query("SELECT * FROM solicitacoes_nova ORDER BY id DESC", (err, result) => {
-    if (err) return res.json({ erro: "Erro ao buscar pedidos" });
-    res.json(result);
-  });
+
+  db.query(
+
+    `SELECT * FROM solicitacoes_nova
+    ORDER BY id DESC`,
+
+    (err, result) => {
+
+      res.json(result);
+
+    }
+
+  );
+
 });
 
+// STATUS
 app.put("/status/:id", (req, res) => {
+
   const { status } = req.body;
 
   db.query(
-    "UPDATE solicitacoes_nova SET status = ? WHERE id = ?",
+
+    `UPDATE solicitacoes_nova
+    SET status=?
+    WHERE id=?`,
+
     [status, req.params.id],
-    (err) => {
-      if (err) return res.json({ erro: "Erro ao atualizar status" });
-      res.json({ sucesso: true });
+
+    () => {
+
+      res.json({
+        sucesso:true
+      });
+
     }
+
   );
+
 });
 
+// GUINCHEIROS
 app.get("/guincheiros", (req, res) => {
-  db.query("SELECT * FROM guincheiros ORDER BY id DESC", (err, result) => {
-    if (err) return res.json({ erro: "Erro ao buscar guincheiros" });
-    res.json(result);
-  });
-});
-
-app.post("/guincheiros", (req, res) => {
-  const { nome, whatsapp, cidade, estado } = req.body;
 
   db.query(
-    `INSERT INTO guincheiros (nome, whatsapp, cidade, estado)
-    VALUES (?, ?, ?, ?)`,
-    [nome, whatsapp, cidade, estado],
-    (err) => {
-      if (err) return res.json({ erro: "Erro ao cadastrar guincheiro" });
-      res.json({ sucesso: true });
+
+    `SELECT * FROM guincheiros
+    ORDER BY id DESC`,
+
+    (err, result) => {
+
+      res.json(result);
+
     }
+
   );
+
 });
 
+// CADASTRAR GUINCHEIRO
+app.post("/guincheiros", (req, res) => {
+
+  const {
+    nome,
+    whatsapp,
+    cidade,
+    estado,
+    senha
+  } = req.body;
+
+  db.query(
+
+    `INSERT INTO guincheiros
+    (nome, whatsapp, cidade, estado, senha)
+
+    VALUES (?, ?, ?, ?, ?)`,
+
+    [
+      nome,
+      whatsapp,
+      cidade,
+      estado,
+      senha
+    ],
+
+    (err) => {
+
+      if (err) {
+
+        return res.json({
+          erro:"Erro cadastro"
+        });
+
+      }
+
+      res.json({
+        sucesso:true
+      });
+
+    }
+
+  );
+
+});
+
+// EXCLUIR
 app.delete("/guincheiros/:id", (req, res) => {
-  db.query("DELETE FROM guincheiros WHERE id = ?", [req.params.id], (err) => {
-    if (err) return res.json({ erro: "Erro ao excluir guincheiro" });
-    res.json({ sucesso: true });
-  });
+
+  db.query(
+
+    `DELETE FROM guincheiros
+    WHERE id=?`,
+
+    [req.params.id],
+
+    () => {
+
+      res.json({
+        sucesso:true
+      });
+
+    }
+
+  );
+
 });
 
 app.listen(process.env.PORT || 3000, () => {
+
   console.log("🚀 Servidor online!");
+
 });
