@@ -6,7 +6,11 @@
   <title>Painel Guincheiro</title>
 
   <style>
-    *{ margin:0; padding:0; box-sizing:border-box; }
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
 
     body{
       font-family:Arial;
@@ -24,7 +28,9 @@
       flex-wrap:wrap;
     }
 
-    h1{ color:#ff8c00; }
+    h1{
+      color:#ff8c00;
+    }
 
     button{
       border:none;
@@ -34,7 +40,10 @@
       cursor:pointer;
     }
 
-    .sair{ background:red; color:white; }
+    .sair{
+      background:red;
+      color:white;
+    }
 
     #lista{
       display:grid;
@@ -50,15 +59,22 @@
       box-shadow:0 10px 25px rgba(0,0,0,.25);
     }
 
-    .pedido.atendimento{ border-left-color:#2f9bff; }
-    .pedido.finalizado{ border-left-color:#39d98a; }
+    .pedido.atendimento{
+      border-left-color:#2f9bff;
+    }
+
+    .pedido.finalizado{
+      border-left-color:#39d98a;
+    }
 
     .pedido h2{
       color:#071a33;
       margin-bottom:12px;
     }
 
-    .pedido p{ margin:6px 0; }
+    .pedido p{
+      margin:6px 0;
+    }
 
     .status{
       display:inline-block;
@@ -69,9 +85,20 @@
       font-weight:bold;
     }
 
-    .pendente{ background:#ffe08a; color:#111; }
-    .andamento{ background:#5db2ff; color:white; }
-    .finalizado{ background:#39d98a; color:white; }
+    .pendente{
+      background:#ffe08a;
+      color:#111;
+    }
+
+    .andamento{
+      background:#5db2ff;
+      color:white;
+    }
+
+    .finalizado{
+      background:#39d98a;
+      color:white;
+    }
 
     .acoes{
       display:flex;
@@ -80,99 +107,185 @@
       margin-top:12px;
     }
 
-    .btn1{ background:#ff8c00; color:white; }
-    .btn2{ background:#2f9bff; color:white; }
-    .btn3{ background:#39d98a; color:white; }
+    .btn1{
+      background:#ff8c00;
+      color:white;
+    }
 
-    a{ text-decoration:none; }
+    .btn2{
+      background:#2f9bff;
+      color:white;
+    }
+
+    .btn3{
+      background:#39d98a;
+      color:white;
+    }
+
+    a{
+      text-decoration:none;
+    }
+
   </style>
 </head>
 
 <body>
 
 <script>
-const guincheiro = JSON.parse(localStorage.getItem("guincheiro"));
+
+const guincheiro =
+  JSON.parse(localStorage.getItem("guincheiro"));
 
 if(!guincheiro){
-  window.location.href = "/login-guincheiro.html";
+
+  window.location.href =
+    "/login-guincheiro.html";
+
 }
+
 </script>
 
 <div class="topo">
-  <h1>🚛 Painel do Guincheiro</h1>
+
+  <h1>
+    🚛 Painel do Guincheiro
+  </h1>
 
   <button class="sair" onclick="sair()">
     Sair
   </button>
+
 </div>
 
-<div id="lista">Carregando...</div>
+<div id="lista">
+  Carregando...
+</div>
 
 <script>
+
+function normalizarTexto(texto){
+
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+}
+
 function sair(){
+
   localStorage.removeItem("guincheiro");
-  window.location.href = "/login-guincheiro.html";
+
+  window.location.href =
+    "/login-guincheiro.html";
+
 }
 
 async function carregarPedidos(){
-  const resposta = await fetch("/pedidos");
-  const pedidos = await resposta.json();
 
-  const lista = document.getElementById("lista");
+  const resposta =
+    await fetch("/pedidos");
 
-  const pedidosCidade = pedidos.filter(p =>
-    p.cidade &&
-    guincheiro.cidade &&
-    p.cidade.toLowerCase() === guincheiro.cidade.toLowerCase()
-  );
+  const pedidos =
+    await resposta.json();
+
+  const lista =
+    document.getElementById("lista");
+
+  const cidadeGuincheiro =
+    normalizarTexto(guincheiro.cidade || "");
+
+  const pedidosCidade = pedidos.filter(p => {
+
+    const cidadePedido =
+      normalizarTexto(p.cidade || "");
+
+    return cidadePedido === cidadeGuincheiro;
+
+  });
 
   if(!pedidosCidade.length){
-    lista.innerHTML = "Nenhuma corrida encontrada.";
+
+    lista.innerHTML =
+      "Nenhuma corrida encontrada.";
+
     return;
+
   }
 
   lista.innerHTML = "";
 
   pedidosCidade.forEach(p => {
+
     let classeStatus = "pendente";
     let classeCard = "";
 
     if(p.status === "Em atendimento"){
+
       classeStatus = "andamento";
       classeCard = "atendimento";
+
     }
 
     if(p.status === "Finalizado"){
+
       classeStatus = "finalizado";
       classeCard = "finalizado";
+
     }
 
     lista.innerHTML += `
+
       <div class="pedido ${classeCard}">
+
         <h2>${p.nome}</h2>
 
         <p><strong>WhatsApp:</strong> ${p.whatsapp}</p>
-        <p><strong>Cidade:</strong> ${p.cidade}/${p.estado}</p>
-        <p><strong>Bairro:</strong> ${p.bairro || "Não informado"}</p>
-        <p><strong>Endereço:</strong> ${p.endereco || "Não informado"}</p>
-        <p><strong>Referência:</strong> ${p.referencia || "Não informado"}</p>
-        <p><strong>Descrição:</strong> ${p.descricao}</p>
+
+        <p><strong>Cidade:</strong>
+        ${p.cidade}/${p.estado}</p>
+
+        <p><strong>Bairro:</strong>
+        ${p.bairro || "Não informado"}</p>
+
+        <p><strong>Endereço:</strong>
+        ${p.endereco || "Não informado"}</p>
+
+        <p><strong>Referência:</strong>
+        ${p.referencia || "Não informado"}</p>
+
+        <p><strong>Descrição:</strong>
+        ${p.descricao}</p>
 
         <div class="status ${classeStatus}">
           ${p.status || "Pendente"}
         </div>
 
         <div class="acoes">
-          <a href="https://wa.me/55${p.whatsapp}" target="_blank">
-            <button class="btn1">Cliente</button>
+
+          <a
+          href="https://wa.me/55${p.whatsapp}"
+          target="_blank">
+
+            <button class="btn1">
+              Cliente
+            </button>
+
           </a>
 
           ${
             p.latitude && p.longitude
             ?
             `
-            <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank">
-              <button class="btn2">Ver GPS</button>
+            <a
+            href="https://www.google.com/maps?q=${p.latitude},${p.longitude}"
+            target="_blank">
+
+              <button class="btn2">
+                Ver GPS
+              </button>
+
             </a>
             `
             :
@@ -180,53 +293,104 @@ async function carregarPedidos(){
           }
 
           <button
-            class="btn2"
-            onclick="aceitarCorrida(${p.id}, '${p.latitude || ""}', '${p.longitude || ""}')">
+          class="btn2"
+          onclick="aceitarCorrida(
+            ${p.id},
+            '${p.latitude || ""}',
+            '${p.longitude || ""}'
+          )">
+
             Aceitar e abrir rota
+
           </button>
 
           <button
-            class="btn3"
-            onclick="alterarStatus(${p.id}, 'Finalizado')">
+          class="btn3"
+          onclick="alterarStatus(
+            ${p.id},
+            'Finalizado'
+          )">
+
             Finalizar
+
           </button>
+
         </div>
+
       </div>
+
     `;
+
   });
+
 }
 
-async function aceitarCorrida(id, latitude, longitude){
+async function aceitarCorrida(
+  id,
+  latitude,
+  longitude
+){
+
   await fetch(`/status/${id}`, {
+
     method:"PUT",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ status:"Em atendimento" })
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({
+
+      status:"Em atendimento"
+
+    })
+
   });
 
   carregarPedidos();
 
   if(latitude && longitude){
+
     window.open(
+
       `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
+
       "_blank"
+
     );
+
   }else{
-    alert("Esse pedido não tem GPS salvo.");
+
+    alert(
+      "Esse pedido não possui GPS."
+    );
+
   }
+
 }
 
 async function alterarStatus(id, status){
+
   await fetch(`/status/${id}`, {
+
     method:"PUT",
-    headers:{ "Content-Type":"application/json" },
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
     body:JSON.stringify({ status })
+
   });
 
   carregarPedidos();
+
 }
 
 carregarPedidos();
+
 setInterval(carregarPedidos, 5000);
+
 </script>
 
 </body>
