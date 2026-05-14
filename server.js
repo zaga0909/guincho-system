@@ -9,7 +9,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, "public")));
 
 const db = mysql.createConnection({
@@ -21,13 +20,9 @@ const db = mysql.createConnection({
 });
 
 db.connect((err) => {
-
   if (err) {
-
     console.log("❌ Erro banco:", err);
-
   } else {
-
     console.log("✅ Banco conectado!");
 
     db.query(`
@@ -37,10 +32,20 @@ db.connect((err) => {
         whatsapp VARCHAR(20),
         cidade VARCHAR(100),
         estado VARCHAR(10),
-        descricao TEXT,
-        status VARCHAR(30) DEFAULT 'Pendente'
+        descricao TEXT
       )
     `);
+
+    db.query(`
+      ALTER TABLE solicitacoes_nova 
+      ADD COLUMN status VARCHAR(30) DEFAULT 'Pendente'
+    `, (err) => {
+      if (err) {
+        console.log("Status já existe ou erro:", err.message);
+      } else {
+        console.log("✅ Coluna status criada!");
+      }
+    });
 
     db.query(`
       CREATE TABLE IF NOT EXISTS guincheiros (
@@ -51,76 +56,41 @@ db.connect((err) => {
         estado VARCHAR(10)
       )
     `);
-
   }
-
 });
 
-// HOME
 app.get("/", (req, res) => {
-
   res.sendFile(path.join(__dirname, "public", "index.html"));
-
 });
 
-// NOVO PEDIDO
 app.post("/solicitar", (req, res) => {
-
-  const {
-    nome,
-    whatsapp,
-    cidade,
-    estado,
-    descricao
-  } = req.body;
+  const { nome, whatsapp, cidade, estado, descricao } = req.body;
 
   db.query(
-
     `INSERT INTO solicitacoes_nova
-    (nome, whatsapp, cidade, estado, descricao)
-    VALUES (?, ?, ?, ?, ?)`,
-
-    [nome, whatsapp, cidade, estado, descricao],
-
+    (nome, whatsapp, cidade, estado, descricao, status)
+    VALUES (?, ?, ?, ?, ?, ?)`,
+    [nome, whatsapp, cidade, estado, descricao, "Pendente"],
     (err) => {
-
       if (err) {
-
         console.log(err);
-
-        return res.json({
-          erro: "Erro ao salvar solicitação"
-        });
-
+        return res.json({ erro: "Erro ao salvar solicitação" });
       }
 
       db.query(
-
         `SELECT * FROM guincheiros
         WHERE LOWER(cidade) = LOWER(?)
         AND UPPER(estado) = UPPER(?)
         LIMIT 1`,
-
         [cidade, estado],
-
         (err2, result) => {
-
           if (err2) {
-
             console.log(err2);
-
-            return res.json({
-              erro: "Erro ao buscar guincheiro"
-            });
-
+            return res.json({ erro: "Erro ao buscar guincheiro" });
           }
 
           if (result.length === 0) {
-
-            return res.json({
-              msg: "Nenhum guincheiro encontrado"
-            });
-
+            return res.json({ msg: "Nenhum guincheiro encontrado" });
           }
 
           const g = result[0];
@@ -132,177 +102,70 @@ Cidade: ${cidade}
 Estado: ${estado}
 Descrição: ${descricao}`;
 
-          res.json({
-            sucesso: true,
-            whatsapp: link
-          });
-
+          res.json({ sucesso: true, whatsapp: link });
         }
-
       );
-
     }
-
   );
-
 });
 
-// LISTAR PEDIDOS
 app.get("/pedidos", (req, res) => {
-
-  db.query(
-
-    "SELECT * FROM solicitacoes_nova ORDER BY id DESC",
-
-    (err, result) => {
-
-      if (err) {
-
-        console.log(err);
-
-        return res.json({
-          erro: "Erro ao buscar pedidos"
-        });
-
-      }
-
-      res.json(result);
-
+  db.query("SELECT * FROM solicitacoes_nova ORDER BY id DESC", (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ erro: "Erro ao buscar pedidos" });
     }
 
-  );
-
+    res.json(result);
+  });
 });
 
-// ALTERAR STATUS
 app.put("/status/:id", (req, res) => {
-
+  const { status } = req.body;
   const id = req.params.id;
 
-  const { status } = req.body;
-
   db.query(
-
-    "UPDATE solicitacoes_nova SET status=? WHERE id=?",
-
+    "UPDATE solicitacoes_nova SET status = ? WHERE id = ?",
     [status, id],
-
     (err) => {
-
       if (err) {
-
         console.log(err);
-
-        return res.json({
-          erro: "Erro ao atualizar status"
-        });
-
+        return res.json({ erro: "Erro ao atualizar status" });
       }
 
-      res.json({
-        sucesso: true
-      });
-
+      res.json({ sucesso: true });
     }
-
   );
-
 });
 
-// LISTAR GUINCHEIROS
 app.get("/guincheiros", (req, res) => {
-
-  db.query(
-
-    "SELECT * FROM guincheiros ORDER BY id DESC",
-
-    (err, result) => {
-
-      if (err) {
-
-        return res.json({
-          erro: "Erro ao buscar guincheiros"
-        });
-
-      }
-
-      res.json(result);
-
-    }
-
-  );
-
+  db.query("SELECT * FROM guincheiros ORDER BY id DESC", (err, result) => {
+    if (err) return res.json({ erro: "Erro ao buscar guincheiros" });
+    res.json(result);
+  });
 });
 
-// CADASTRAR GUINCHEIRO
 app.post("/guincheiros", (req, res) => {
-
-  const {
-    nome,
-    whatsapp,
-    cidade,
-    estado
-  } = req.body;
+  const { nome, whatsapp, cidade, estado } = req.body;
 
   db.query(
-
-    `INSERT INTO guincheiros
-    (nome, whatsapp, cidade, estado)
+    `INSERT INTO guincheiros (nome, whatsapp, cidade, estado)
     VALUES (?, ?, ?, ?)`,
-
     [nome, whatsapp, cidade, estado],
-
     (err) => {
-
-      if (err) {
-
-        return res.json({
-          erro: "Erro ao cadastrar guincheiro"
-        });
-
-      }
-
-      res.json({
-        sucesso: true
-      });
-
+      if (err) return res.json({ erro: "Erro ao cadastrar guincheiro" });
+      res.json({ sucesso: true });
     }
-
   );
-
 });
 
-// EXCLUIR GUINCHEIRO
 app.delete("/guincheiros/:id", (req, res) => {
-
-  db.query(
-
-    "DELETE FROM guincheiros WHERE id=?",
-
-    [req.params.id],
-
-    (err) => {
-
-      if (err) {
-
-        return res.json({
-          erro: "Erro ao excluir"
-        });
-
-      }
-
-      res.json({
-        sucesso: true
-      });
-
-    }
-
-  );
-
+  db.query("DELETE FROM guincheiros WHERE id = ?", [req.params.id], (err) => {
+    if (err) return res.json({ erro: "Erro ao excluir guincheiro" });
+    res.json({ sucesso: true });
+  });
 });
 
 app.listen(process.env.PORT || 3000, () => {
-
   console.log("🚀 Servidor online!");
-
 });
