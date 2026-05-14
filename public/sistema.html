@@ -20,9 +20,52 @@
       padding:30px;
     }
 
+    .topo{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:30px;
+    }
+
     h1{
       color:#ff8c00;
-      margin-bottom:30px;
+    }
+
+    .logout{
+      background:red;
+      color:white;
+      border:none;
+      padding:12px 18px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .dashboard{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:20px;
+      margin-bottom:40px;
+    }
+
+    .card{
+      background:white;
+      color:#111;
+      padding:25px;
+      border-radius:18px;
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
+    }
+
+    .card h2{
+      font-size:18px;
+      margin-bottom:10px;
+      color:#071a33;
+    }
+
+    .numero{
+      font-size:38px;
+      font-weight:bold;
+      color:#ff8c00;
     }
 
     #lista{
@@ -101,12 +144,6 @@
       color:white;
     }
 
-    .logout{
-      background:red;
-      color:white;
-      margin-bottom:25px;
-    }
-
     a{
       text-decoration:none;
     }
@@ -126,11 +163,39 @@ if(localStorage.getItem("adminLogado") !== "sim"){
 
 </script>
 
-<button class="logout" onclick="sair()">
-  Sair
-</button>
+<div class="topo">
 
-<h1>🚛 Painel Vadeco'S Guinchos</h1>
+  <h1>🚛 Painel Vadeco'S Guinchos</h1>
+
+  <button class="logout" onclick="sair()">
+    Sair
+  </button>
+
+</div>
+
+<div class="dashboard">
+
+  <div class="card">
+    <h2>Total de Pedidos</h2>
+    <div class="numero" id="totalPedidos">0</div>
+  </div>
+
+  <div class="card">
+    <h2>Pendentes</h2>
+    <div class="numero" id="pendentes">0</div>
+  </div>
+
+  <div class="card">
+    <h2>Em Atendimento</h2>
+    <div class="numero" id="andamento">0</div>
+  </div>
+
+  <div class="card">
+    <h2>Finalizados</h2>
+    <div class="numero" id="finalizados">0</div>
+  </div>
+
+</div>
 
 <div id="lista">
   Carregando pedidos...
@@ -151,6 +216,18 @@ async function carregarPedidos(){
   const resposta = await fetch("/pedidos");
 
   const pedidos = await resposta.json();
+
+  // DASHBOARD
+  document.getElementById("totalPedidos").innerText = pedidos.length;
+
+  document.getElementById("pendentes").innerText =
+    pedidos.filter(p => !p.status || p.status === "Pendente").length;
+
+  document.getElementById("andamento").innerText =
+    pedidos.filter(p => p.status === "Em atendimento").length;
+
+  document.getElementById("finalizados").innerText =
+    pedidos.filter(p => p.status === "Finalizado").length;
 
   const lista = document.getElementById("lista");
 
